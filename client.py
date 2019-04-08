@@ -6,8 +6,6 @@ import sys
 irc = {
     'host': 'localhost',
     'port': 1459,
-    'channel': '#channel',
-    'namesinterval': 5
 }
 
 user = {
