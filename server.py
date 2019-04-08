@@ -1,15 +1,30 @@
 #!/usr/bin/python3
 
+import logging
 import socket
 import sys
-import thread
+import threading
 
 
 def __init__():
-    s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    """
+        Initialize the server socket
+    """
+    sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     return s
 
+
+def __user__():
+    """
+        Get the current user nickname and IP.
+    """
+    command = s.recvfrom(4096)
+    users.update({command[0]: command[1]})
+    return command[0]
+
+
+banlist = {}
 users = {}
 channels = {}
 irc = {
@@ -17,55 +32,172 @@ irc = {
     'port': 1459,
 }
 
+
+def get_channel(channel):
+    """
+        Returns the channel from the channel list.
+
+    @param channel: Searched channel.
+    """
+    try:
+        return channels[channel]
+    except Exception as e:
+        print('Error: Channel not found.')
+        logging.exception(e)
+
+
 def get_user(user):
-    command = s.recvfrom(4096)
-    user.update({command[0] : command[1]})
+    """
+        Return the user from the user list.
+
+     @param user: Searched user.
+    """
+    try:
+        return users[user]
+    except Exception as e:
+        print('Error: User not found.')
+        logging.exception(e)
+
+
+def get_user_from_channel(channel):
+    """
+        Return the users from a channel.
+
+    @param channel: Searched channel.
+    """
+    # TODO : complete the function
+
+
+def get_channel_from_user(user):
+    """
+        Return the channel from an user.
+
+    @param user: Searched user.
+    """
+    try:
+        for c in channels:
+            if user in c:
+                return c
+    except Exception as e:
+        print('Error: Channel not found')
+        logging.exception(e)
+
 
 def channel_list():
-    for c in channels:
-        print (channels.keys(c)
-        
+    """
+        Display the channel list.
+    """
+    for c in channels.keys():
+        print(c)
+
+
 def join_channel(channel):
-    ## TO DO
-    
+    """
+        Add the current user to the list of joined users for a channel.
+
+    @param channel: The target channel.
+    """
+    # TODO : complete the function
+
+
 def create_channel(channel):
-    
-        
+    """
+        Create a new channel and add it to the channel list.
+
+    @param channel: Channel to be created
+    """
+    # TODO : complete the function
+
+
 def join(channel):
+    """
+        Add an user to a channel
+
+    @param channel: Target channel.
+    """
     c = 0
-    while (channels.values(c) != channel && c <= len(channels)):
+    while channels.values() != channel and c <= len(channels):
         c = c + 1
-    if (c > len(channels)):
+    if c > len(channels):
         create_channel(channel)
     join_channel(channel)
-    
-def who():
-    for u in users:
-        print (users.values(u))
-        
-def private(data):
-    ## TO DO
+
+
+def who(channel):
+    """
+        Display the present users in a channel.
+
+    @param channel: The target channel.
+    """
+    current_users = get_channel(channel)
+    for u in current_users:
+        print(u)
+
+
+def private(user):
+    """
+        Sends a private message to an user.
+
+    @param user: The target user.
+    """
+    # TODO : complete the function
+
 
 def leave():
-    ## TO DO
+    """
+        Remove an user from a channel
+
+    @param
+    """
+    # TODO : complete the function
+
 
 def disconnect():
-    ## TO DO
-    
-def kick(user):
-    ## TO DO
-    
-def kill(user):
-    ## TO DO
-    
-def ban(user):
-    ## TO DO
+    """
+        Close the connection with the IRC server
+    """
+    # TODO : complete the function
 
-def start(s):
-    s.bind((irc['host'], irc['port']))
-    while True :
-        s.listen(5)
-        command = s.recvfrom(4096)
+
+def kick(user, channel):
+    """
+        Remove an user from a channel
+
+    @param user: The target user.
+    @param channel: The target channel.
+    :return:
+    """
+    # TODO : complete the function
+
+
+def kill(user):
+    """
+        Remove an user from its current channel and force its disconnection.
+
+    @param user: The target user.
+    """
+    # TODO : complete the function
+
+
+def ban(user):
+    """
+        Force the disconnection of a user and ban its IP address.
+
+    @param user: The target user.
+    """
+    # TODO : complete the function
+
+
+def start(sock):
+    """
+        Start and loop the IRC server.
+
+    @param sock: The current socket.
+    """
+    sock.bind((irc['host'], irc['port']))
+    while True:
+        sock.listen(5)
+        command = sock.recvfrom(4096)
         data = command[0]
         if data == '/LIST':
             channel_list()
@@ -73,7 +205,7 @@ def start(s):
             tmp = data.split(' ')
             join(tmp[1])
         elif data == '/WHO':
-            who()
+            who(get_channel_from_user(usr))
         elif data == 'PRV_MSG':
             tmp = data.split(' ')
             private(tmp[1])
@@ -83,7 +215,7 @@ def start(s):
             disconnect()
         elif data == '/KICK':
             tmp = data.split(' ')
-            kick(tmp[1])
+            kick(tmp[1], tmp[2])
         elif data == '/KILL':
             tmp = data.split(' ')
             kill(tmp[1])
@@ -91,13 +223,11 @@ def start(s):
             tmp = data.split(' ')
             ban(tmp[1])
         else:
-            break # A MODIFIER ASAP
-            
+            pass
 
 
-
-### MAIN ###
+""" MAIN """
 
 s = __init__()
+usr = __user__()
 start(s)
-

@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import logging
 import socket
 import sys
 
@@ -10,15 +11,34 @@ irc = {
 
 user = {
     'nick': 'nick',
-    'username': 'botuser',
+    'username': 'user',
     'hostname': 'localhost',
     'servername': 'localhost',
-    'realname': 'Raspberry Pi Names Bot'
 }
 
 
-# open a connection with the server
+def __log__(e):
+    """
+        Return the error log.
+    """
+    logging.exception(e)
+
+
+def is_client_valid(client):
+    """
+        Check if the client is valid.
+    @param client: Target client.
+    """
+    if not client:
+        print("Error. You must specify a client.")
+        return False
+    return True
+
+
 def irc_conn():
+    """
+        Establish connection with the IRC server.
+    """
     try:
         print('Connecting to {host}:{port}...'.format(**irc))
         s.connect((irc['host'], irc['port']))
@@ -27,84 +47,114 @@ def irc_conn():
         sys.exit(1)
 
 
-# simple function to send data through the socket
 def send_data(data):
+    """
+        Send a data to the server.
+
+    @param data: Data block to send
+    """
     s.send(data + '\n')
 
 
-# join the channel
-
 def join(channel):
-    if not channel:
-        print('Error. You must specify a channel to join.')
-    else:
+    """
+        Join a channel
+
+    @param channel: Target channel.
+    """
+    try:
         send_data("JOIN %s" % channel)
+    except ValueError as e:
+        print('Error. You must specify a channel to join.')
+        __log__(e)
 
 
-# create and send username
 def nick():
-    nickname = input('Choose a nickname:')
-    send_data("NICK " + nickname)
+    """
+        Define a nick for a user.
+
+    """
+    try:
+        nickname = input('Choose a nickname:')
+        send_data("NICK " + nickname)
+    except Exception as e:
+        __log__(e)
 
 
-# Displays the channel list
 def channel_list():
+    """
+        Display the channel list.
+    """
     send_data("LIST")
 
 
-# Sees who is in the channel
 def who():
+    """
+        Display the users in the current channel.
+    """
     send_data("WHO")
 
 
-# Private message
-def private(message):
-    if not message:
+def private(usr):
+    """
+        Send a private message to an user
+    @:param user
+    """
+    try:
+        send_data("PRV_MSG %s" % usr)
+    except ValueError as e:
         print('Error. Empty message.')
-    else:
-        send_data("PRV_MSG %s" % message)
+        __log__(e)
 
 
-# Leaves the current channel
 def leave():
+    """
+        Leave the current channel
+    """
     send_data("LEAVE")
 
 
-# Disconnects
 def disconnect():
+    """
+        Leave the server
+    """
     send_data("BYE")
 
 
-### ADMINISTRATOR COMMANDS ###
-
-# Checks if the client parameter is valid
-def is_client_valid(client):
-    if not client:
-        print("Error. You must specify a client.")
-        return False
-    return True
+"""ADMINISTRATOR COMMANDS"""
 
 
-# Kicks the client client
 def kick(client):
+    """
+        Kick the client from its channel.
+
+    @param client: Target client.
+    """
     if is_client_valid(client):
         send_data("KICK %s" % client)
 
 
-# Kicks the client client from the IRC
 def kill(client):
+    """
+        Kick the client from the server.
+
+    @param client: Target client.
+    """
     if is_client_valid(client):
         send_data("KILL %s" % client)
 
 
-# Kicks the client client from the IRC and bans its IP
 def ban(client):
+    """
+        Kick the client from the server and ban its IP
+
+    @param client: Target client
+    """
     if is_client_valid(client):
         send_data("BAN %s" % client)
 
 
-#### MAIN ####
-
+""" MAIN """
 
 # Opening a socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
@@ -139,15 +189,15 @@ while True:
         tmp = command.split(' ')
         ban(tmp[1])
     elif command == '/HELP':
-        print('/LIST : Displays the current channels ;\n'
+        print('/LIST : Display the current channels ;\n'
               '/JOIN + channel : Join the channel "channel". If it doesn\'t exist, create and join ;\n'
-              '/WHO : Displays the current user of the channel ;\n'
-              '/PRV_MSG + user : Sends a private message to the user "user" ;\n'
-              '/LEAVE : Leaves the channel ;\n'
-              '/BYE : Quits the server ;\n'
-              '/KICK + user : Leaves the user "user" of the current channel ;\n'
-              '/KILL + user : Disconnects the user "user" ;\n'
-              '/BAN + user : Disconnects the user "user" and blacklists the IP adress ;\n')
+              '/WHO : Display the current user of the channel ;\n'
+              '/PRV_MSG + user : Send a private message to the user "user" ;\n'
+              '/LEAVE : Leave the channel ;\n'
+              '/BYE : Quit the server ;\n'
+              '/KICK + user : Leave the user "user" of the current channel ;\n'
+              '/KILL + user : Disconnect the user "user" ;\n'
+              '/BAN + user : Disconnect the user "user" and blacklists the IP address ;\n')
     elif command.find('/'):
         print('Error. Unknown command')
     else:
