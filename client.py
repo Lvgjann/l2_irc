@@ -141,7 +141,15 @@ while True:
         tmp = command.split(' ')
         ban(tmp[1])
     elif command == '/HELP':
-        print('TODO')
+        print('/LIST : Displays the current channels ;\n'
+              '/JOIN + channel : Join the channel "channel". If it doesn\'t exist, create and join ;\n'
+              '/WHO : Displays the current user of the channel ;\n'
+              '/PRV_MSG + user : Sends a private message to the user "user" ;\n'
+              '/LEAVE : Leaves the channel ;\n'
+              '/BYE : Quits the server ;\n'
+              '/KICK + user : Leaves the user "user" of the current channel ;\n'
+              '/KILL + user : Disconnects the user "user" ;\n'
+              '/BAN + user : Disconnects the user "user" and blacklists the IP adress ;\n')
     elif command.find('/'):
         print('Error. Unknown command')
     else:
