@@ -24,7 +24,9 @@ def __user__():
     return command[0]
 
 
-banlist = {}
+banlist = {
+    # Nick[string] : IP[string]
+}
 users = {
     # Nick[string] : IP[string]      
 }
@@ -97,8 +99,17 @@ def is_error_get(f, param):
         f(param)
         return False
     except Exception as e:
+        logging.exception(e)
         return True
-    
+
+
+def is_admin(user):
+    """
+        return true if the user is administrator
+    @param user: The target user.
+    """
+    # TODO: complete the function
+
 
 def channel_list():
     """
@@ -114,7 +125,7 @@ def join_channel(channel):
 
     @param channel: The target channel.
     """
-    user = __user__ ()
+    user = __user__()
     channels[channel].append(user)
 
 
@@ -135,14 +146,12 @@ def join(channel):
     @param channel: Target channel.
     """
     try:
-        c = 0
-        while channels.values() != channel and c <= len(channels):
-            c = c + 1
-        if c > len(channels):
+        if channel in channels:
+            join_channel(channel)
+        else:
             create_channel(channel)
-        join_channel(channel)
     except Exception as e:
-        print('Error: Channel not found')
+        print('Error: Cannot join or create the channel.')
         logging.exception(e)
 
 
@@ -157,21 +166,13 @@ def who(channel):
         print(u)
 
 
-def is_admin (user):
-    """
-        return true if the user is administrator
-    @param user: The target user.
-    """
-    # TO DO: complete the function
-    
-    
-def set_admin (user):
+def set_admin(user):
     """
         set a user as admin
     @param user: the target user.
     """
-    
-    # TO DO: complete the function
+
+    # TODO: complete the function
 
 
 def private(user):
@@ -190,6 +191,7 @@ def delete_channel(channel):
     @param channel: The target channel.
     """
     del channels[channel]
+
 
 def leave():
     """
@@ -215,16 +217,19 @@ def kick(user, channel):
     @param channel: The target channel.
     :return:
     """
-    # TODO : complete the function
+    channels[channel].remove(user)
 
 
 def kill(user):
     """
-        Remove an user from its current channel and force its disconnection.
+        Remove an user from its current channel and close its connection.
 
     @param user: The target user.
     """
     # TODO : complete the function
+    c = get_channel_from_user(user)
+    c.remove(user)
+    # Close connection
 
 
 def ban(user):
@@ -234,6 +239,10 @@ def ban(user):
     @param user: The target user.
     """
     # TODO : complete the function
+    c = get_channel_from_user(user)
+    c.remove(user)
+    # Close connection
+    banlist.update(user)
 
 
 def start(sock):
