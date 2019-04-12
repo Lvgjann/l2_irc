@@ -26,3 +26,4 @@ KILL nick : déconnecte brutalement le client du serveur (équivalent de BYE mai
 BAN nick : déconnecte le client (comme KILL) et l'ajoute (son adresse IP) dans une liste de clients interdits
 Remarques
 Le dernier client a quitter le canal entraîne la fermeture de ce canal
+Savoir si l'utilisateur est admin ou pas

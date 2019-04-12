@@ -25,8 +25,12 @@ def __user__():
 
 
 banlist = {}
-users = {}
-channels = {}
+users = {
+    # Nick[string] : IP[string]      
+}
+channels = {
+    # Name channel[string] : List of users[list]
+}
 irc = {
     'host': '127.0.0.1',
     'port': 1459,
@@ -65,7 +69,12 @@ def get_user_from_channel(channel):
 
     @param channel: Searched channel.
     """
-    # TODO : complete the function
+    try:
+        c = channels.get(channel)
+        return c
+    except Exception as e:
+        print('Error: User not found.')
+        logging.exception(e)
 
 
 def get_channel_from_user(user):
@@ -83,6 +92,14 @@ def get_channel_from_user(user):
         logging.exception(e)
 
 
+def is_error_get(f, param):
+    try:
+        f(param)
+        return False
+    except Exception as e:
+        return True
+    
+
 def channel_list():
     """
         Display the channel list.
@@ -97,7 +114,8 @@ def join_channel(channel):
 
     @param channel: The target channel.
     """
-    # TODO : complete the function
+    user = __user__ ()
+    channels[channel].append(user)
 
 
 def create_channel(channel):
@@ -106,7 +124,8 @@ def create_channel(channel):
 
     @param channel: Channel to be created
     """
-    # TODO : complete the function
+    user = __user__()
+    channels[channel] = user
 
 
 def join(channel):
@@ -115,12 +134,16 @@ def join(channel):
 
     @param channel: Target channel.
     """
-    c = 0
-    while channels.values() != channel and c <= len(channels):
-        c = c + 1
-    if c > len(channels):
-        create_channel(channel)
-    join_channel(channel)
+    try:
+        c = 0
+        while channels.values() != channel and c <= len(channels):
+            c = c + 1
+        if c > len(channels):
+            create_channel(channel)
+        join_channel(channel)
+    except Exception as e:
+        print('Error: Channel not found')
+        logging.exception(e)
 
 
 def who(channel):
@@ -129,9 +152,26 @@ def who(channel):
 
     @param channel: The target channel.
     """
-    current_users = get_channel(channel)
+    current_users = get_user_from_channel(channel)
     for u in current_users:
         print(u)
+
+
+def is_admin (user):
+    """
+        return true if the user is administrator
+    @param user: The target user.
+    """
+    # TO DO: complete the function
+    
+    
+def set_admin (user):
+    """
+        set a user as admin
+    @param user: the target user.
+    """
+    
+    # TO DO: complete the function
 
 
 def private(user):
@@ -142,6 +182,14 @@ def private(user):
     """
     # TODO : complete the function
 
+
+def delete_channel(channel):
+    """
+        Removes a channel.
+        
+    @param channel: The target channel.
+    """
+    del channels[channel]
 
 def leave():
     """
