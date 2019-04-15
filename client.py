@@ -101,7 +101,7 @@ def private(usr):
     @:param user
     """
     try:
-        send_data("PRV_MSG %s" % usr)
+        send_data("MSG %s" % usr)
     except ValueError as e:
         print('Error. Empty message.')
         __log__(e)
@@ -119,7 +119,13 @@ def disconnect():
         Leave the server
     """
     send_data("BYE")
-
+    
+def rename(channel):
+    """
+        Rename channel
+    @param channel: The new name of the channel
+    """
+    send_data("REN %s" % channel)
 
 """ADMINISTRATOR COMMANDS"""
 
@@ -172,7 +178,7 @@ while True:
         join(tmp[1])
     elif command == '/WHO':
         who()
-    elif command == 'PRV_MSG':
+    elif command == 'MSG':
         tmp = command.split(' ')
         private(tmp[1])
     elif command == '/LEAVE':
@@ -188,11 +194,14 @@ while True:
     elif command == '/BAN':
         tmp = command.split(' ')
         ban(tmp[1])
+    elif command == '/REN':
+        tmp = command.split(' ')
+        rename(tmp[1])
     elif command == '/HELP':
         print('/LIST : Display the current channels ;\n'
               '/JOIN + channel : Join the channel "channel". If it doesn\'t exist, create and join ;\n'
               '/WHO : Display the current user of the channel ;\n'
-              '/PRV_MSG + user : Send a private message to the user "user" ;\n'
+              '/MSG + user : Send a private message to the user "user" ;\n'
               '/LEAVE : Leave the channel ;\n'
               '/BYE : Quit the server ;\n'
               '/KICK + user : Leave the user "user" of the current channel ;\n'
