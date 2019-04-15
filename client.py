@@ -11,9 +11,7 @@ irc = {
 
 user = {
     'nick': 'nick',
-    'username': 'user',
-    'hostname': 'localhost',
-    'servername': 'localhost',
+    'ip': 'userIp',
 }
 
 

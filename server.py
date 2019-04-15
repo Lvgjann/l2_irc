@@ -34,7 +34,7 @@ channels = {
     # Name channel[string] : List of users[list]
 }
 irc = {
-    'host': '127.0.0.1',
+    'host': '',
     'port': 1459,
 }
 
@@ -103,14 +103,6 @@ def is_error_get(f, param):
         return True
 
 
-def is_admin(user):
-    """
-        return true if the user is administrator
-    @param user: The target user.
-    """
-    # TODO: complete the function
-
-
 def channel_list():
     """
         Display the channel list.
@@ -165,14 +157,20 @@ def who(channel):
     for u in current_users:
         print(u)
 
+def is_admin(user):
+    """
+        return true if the user is administrator
+    @param user: The target user.
+    """
+    return (user.startswith('@') and user.endswith('@'))
 
 def set_admin(user):
     """
         set a user as admin
     @param user: the target user.
     """
-
-    # TODO: complete the function
+    user = '@' + user + '@'
+    return user
 
 
 def private(user):
@@ -197,7 +195,6 @@ def leave():
     """
         Remove an user from a channel
 
-    @param
     """
     # TODO : complete the function
 
@@ -215,7 +212,6 @@ def kick(user, channel):
 
     @param user: The target user.
     @param channel: The target channel.
-    :return:
     """
     channels[channel].remove(user)
 
