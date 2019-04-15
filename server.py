@@ -6,24 +6,6 @@ import sys
 import threading
 
 
-def __init__():
-    """
-        Initialize the server socket
-    """
-    sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    return s
-
-
-def __user__():
-    """
-        Get the current user nickname and IP.
-    """
-    command = s.recvfrom(4096)
-    users.update({command[0]: command[1]})
-    return command[0]
-
-
 banlist = {
     # Nick[string] : IP[string]
 }
@@ -37,6 +19,26 @@ irc = {
     'host': '',
     'port': 1459,
 }
+
+
+def __init__():
+    """
+        Initialize the server socket
+    """
+    sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.bind((irc['host'], irc['port']))
+    sock.listen(5)
+    conn, addr = sock.accept()
+    # Get data and address
+    data = conn.recv(4096)
+    data = data.decode()
+    # Get the nick from the data (the NICK command is avoided)
+    tmp = data.split(' ')
+    data = tmp[1]
+    users.update({data: addr})
+    print ("New user : " + data)
+    return sock, data
 
 
 def get_channel(channel):
@@ -107,6 +109,7 @@ def channel_list():
     """
         Display the channel list.
     """
+    print('Active channels : \n')
     for c in channels.keys():
         print(c)
 
@@ -117,7 +120,7 @@ def join_channel(channel):
 
     @param channel: The target channel.
     """
-    user = __user__()
+    user = usr
     channels[channel].append(user)
 
 
@@ -127,8 +130,7 @@ def create_channel(channel):
 
     @param channel: Channel to be created
     """
-    user = __user__()
-    channels[channel] = user
+    channels.update({channel: [usr]})
 
 
 def join(channel):
@@ -142,6 +144,7 @@ def join(channel):
             join_channel(channel)
         else:
             create_channel(channel)
+            join_channel(channel)
     except Exception as e:
         print('Error: Cannot join or create the channel.')
         logging.exception(e)
@@ -241,46 +244,62 @@ def ban(user):
     banlist.update(user)
 
 
-def start(sock):
+def start():
     """
         Start and loop the IRC server.
 
     @param sock: The current socket.
     """
-    sock.bind((irc['host'], irc['port']))
-    while True:
+#    sys.setraw(sys.stdin)
+    print('Starting server...')
+    conn, addr = sock.accept()
+    while True: 
+    
         sock.listen(5)
-        command = sock.recvfrom(4096)
+        conn, addr = sock.accept()
+        print('Listen.')
+        # Get data and address
+        print(conn)
+        print(addr)
+        print('Connection accepted.')
+        data = conn.recv(4096).decode()
+        print('Connection accepted.')
+        # Get the ick from the data (the NICK command is avoided)
+        tmp = data.split(' ')
+        command = tmp[0]
+        data = tmp[1]
+        print('Command : %s' % command)
+        print('Data : %s' % data)
+        """
+        command = conn.recv(4096).decode("ascii") 
         data = command[0]
-        if data == '/LIST':
+        """
+        if command == 'LIST':
+            print('Entering /list function')
             channel_list()
-        elif '/JOIN' in data:
-            tmp = data.split(' ')
-            join(tmp[1])
-        elif data == '/WHO':
+        elif 'JOIN' in data:
+            join(data)
+        elif command == 'WHO':
             who(get_channel_from_user(usr))
-        elif data == 'PRV_MSG':
-            tmp = data.split(' ')
-            private(tmp[1])
-        elif data == '/LEAVE':
+        elif command == 'PRV_MSG':
+            private(data)
+        elif command == 'LEAVE':
             leave()
-        elif data == '/BYE':
+        elif command == 'BYE':
             disconnect()
-        elif data == '/KICK':
-            tmp = data.split(' ')
-            kick(tmp[1], tmp[2])
-        elif data == '/KILL':
-            tmp = data.split(' ')
-            kill(tmp[1])
-        elif data == '/BAN':
-            tmp = data.split(' ')
-            ban(tmp[1])
+        elif command == 'KICK':
+            kick(data)
+        elif command == 'KILL':
+            kill(data)
+        elif command == 'BAN':
+            ban(data)
         else:
-            pass
+            continue
 
 
 """ MAIN """
 
-s = __init__()
-usr = __user__()
-start(s)
+sock,usr = __init__()
+print ("Init done\n")
+start()
+

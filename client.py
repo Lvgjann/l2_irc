@@ -5,7 +5,7 @@ import socket
 import sys
 
 irc = {
-    'host': 'localhost',
+    'host': '',
     'port': 1459,
 }
 
@@ -38,7 +38,7 @@ def irc_conn():
         Establish connection with the IRC server.
     """
     try:
-        print('Connecting to {host}:{port}...'.format(**irc))
+        print('Connecting to the server : {port}...'.format(**irc))
         s.connect((irc['host'], irc['port']))
     except socket.error:
         print('Error connecting to IRC server {host}:{port}'.format(**irc))
@@ -51,7 +51,7 @@ def send_data(data):
 
     @param data: Data block to send
     """
-    s.send(data + '\n')
+    s.send(data.encode())
 
 
 def join(channel):
@@ -74,9 +74,11 @@ def nick():
     """
     try:
         nickname = input('Choose a nickname:')
-        send_data("NICK " + nickname)
+        send_data('NICK %s' % nickname)
+        return nickname
     except Exception as e:
         __log__(e)
+    
 
 
 def channel_list():
@@ -157,6 +159,17 @@ def ban(client):
     if is_client_valid(client):
         send_data("BAN %s" % client)
 
+def help():
+    print('/LIST : Display the current channels ;\n'
+              '/JOIN + channel : Join the channel "channel". If it doesn\'t exist, create and join ;\n'
+              '/WHO : Display the current user of the channel ;\n'
+              '/MSG + user : Send a private message to the user "user" ;\n'
+              '/LEAVE : Leave the channel ;\n'
+              '/BYE : Quit the server ;\n\n'
+              'IF YOU\'RE ADMIN : \n'
+              '-> /KICK + user : Leave the user "user" of the current channel ;\n'
+              '-> /KILL + user : Disconnect the user "user" ;\n'
+              '-> /BAN + user : Disconnect the user "user" and blacklists the IP address ;\n')
 
 """ MAIN """
 
@@ -165,7 +178,9 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
 # Connects to the IRC server
 irc_conn()
 # Defines a nickname
-nick()
+nickname = nick()
+print ("You choose the nick %s, you can use the command below : \n" % nickname)
+help()
 
 while True:
     command = input('')
@@ -196,16 +211,8 @@ while True:
         tmp = command.split(' ')
         rename(tmp[1])
     elif command == '/HELP':
-        print('/LIST : Display the current channels ;\n'
-              '/JOIN + channel : Join the channel "channel". If it doesn\'t exist, create and join ;\n'
-              '/WHO : Display the current user of the channel ;\n'
-              '/MSG + user : Send a private message to the user "user" ;\n'
-              '/LEAVE : Leave the channel ;\n'
-              '/BYE : Quit the server ;\n'
-              '/KICK + user : Leave the user "user" of the current channel ;\n'
-              '/KILL + user : Disconnect the user "user" ;\n'
-              '/BAN + user : Disconnect the user "user" and blacklists the IP address ;\n')
+        help()
     elif command.find('/'):
-        print('Error. Unknown command')
+        print('Error. Unknown command, try "/HELP" to see the commands\n')
     else:
         send_data(command)
