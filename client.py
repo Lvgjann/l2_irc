@@ -25,10 +25,10 @@ def __log__(e):
 def is_client_valid(client):
     """
         Check if the client is valid.
-    @param client: Target client.
+    :param client: Target client.
     """
     if not client:
-        print("Error. You must specify a client.")
+        print('Error: client cannot be empty.')
         return False
     return True
 
@@ -41,7 +41,7 @@ def irc_conn():
         print('Connecting to the server : {port}...'.format(**irc))
         s.connect((irc['host'], irc['port']))
     except socket.error:
-        print('Error connecting to IRC server {host}:{port}'.format(**irc))
+        print('Error: Unable to connect to IRC server {host}:{port}'.format(**irc))
         sys.exit(1)
 
 
@@ -49,7 +49,7 @@ def send_data(data):
     """
         Send a data to the server.
 
-    @param data: Data block to send
+    :param data: Data block to send
     """
     s.send(data.encode())
 
@@ -58,12 +58,12 @@ def join(channel):
     """
         Join a channel
 
-    @param channel: Target channel.
+    :param channel: Target channel.
     """
     try:
         send_data("JOIN %s" % channel)
     except ValueError as e:
-        print('Error. You must specify a channel to join.')
+        print('Error: channel cannot be empty.')
         __log__(e)
 
 
@@ -73,59 +73,37 @@ def nick():
 
     """
     try:
-        nickname = input('Choose a nickname:')
-        send_data('NICK %s' % nickname)
-        return nickname
+        n = input('Choose a nickname:')
+        send_data('NICK %s' % n)
+        return n
     except Exception as e:
+        print('Error: nickname cannnot be empty.')
         __log__(e)
-    
-
-
-def channel_list():
-    """
-        Display the channel list.
-    """
-    send_data("LIST")
-
-
-def who():
-    """
-        Display the users in the current channel.
-    """
-    send_data("WHO")
 
 
 def private(usr):
     """
         Send a private message to an user
-    @:param user
+    :param usr
     """
     try:
         send_data("MSG %s" % usr)
     except ValueError as e:
-        print('Error. Empty message.')
+        print('Error: user cannot be empty.')
         __log__(e)
 
 
-def leave():
-    """
-        Leave the current channel
-    """
-    send_data("LEAVE")
-
-
-def disconnect():
-    """
-        Leave the server
-    """
-    send_data("BYE")
-    
 def rename(channel):
     """
         Rename channel
     @param channel: The new name of the channel
     """
-    send_data("REN %s" % channel)
+    try:
+        send_data("REN %s" % channel)
+    except ValueError as e:
+        print('Error: channel cannot be empty')
+        __log__(e)
+
 
 """ADMINISTRATOR COMMANDS"""
 
@@ -134,7 +112,7 @@ def kick(client):
     """
         Kick the client from its channel.
 
-    @param client: Target client.
+    :param client: Target client.
     """
     if is_client_valid(client):
         send_data("KICK %s" % client)
@@ -144,7 +122,7 @@ def kill(client):
     """
         Kick the client from the server.
 
-    @param client: Target client.
+    :param client: Target client.
     """
     if is_client_valid(client):
         send_data("KILL %s" % client)
@@ -154,22 +132,24 @@ def ban(client):
     """
         Kick the client from the server and ban its IP
 
-    @param client: Target client
+    :param client: Target client
     """
     if is_client_valid(client):
         send_data("BAN %s" % client)
 
-def help():
+
+def man():
     print('/LIST : Display the current channels ;\n'
-              '/JOIN + channel : Join the channel "channel". If it doesn\'t exist, create and join ;\n'
-              '/WHO : Display the current user of the channel ;\n'
-              '/MSG + user : Send a private message to the user "user" ;\n'
-              '/LEAVE : Leave the channel ;\n'
-              '/BYE : Quit the server ;\n\n'
-              'IF YOU\'RE ADMIN : \n'
-              '-> /KICK + user : Leave the user "user" of the current channel ;\n'
-              '-> /KILL + user : Disconnect the user "user" ;\n'
-              '-> /BAN + user : Disconnect the user "user" and blacklists the IP address ;\n')
+          '/JOIN + channel : Join the channel "channel". If it doesn\'t exist, create and join ;\n'
+          '/WHO : Display the current user of the channel ;\n'
+          '/MSG + user : Send a private message to the user "user" ;\n'
+          '/LEAVE : Leave the channel ;\n'
+          '/BYE : Quit the server ;\n\n'
+          'IF YOU\'RE ADMIN : \n'
+          '-> /KICK + user : Leave the user "user" of the current channel ;\n'
+          '-> /KILL + user : Disconnect the user "user" ;\n'
+          '-> /BAN + user : Disconnect the user "user" and blacklists the IP address ;\n')
+
 
 """ MAIN """
 
@@ -179,39 +159,39 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
 irc_conn()
 # Defines a nickname
 nickname = nick()
-print ("You choose the nick %s, you can use the command below : \n" % nickname)
+print("You choose the nick %s, you can use the command below : \n" % nickname)
 help()
 
 while True:
     command = input('')
     if command == '/LIST':
-        channel_list()
+        send_data("LIST")
     elif '/JOIN' in command:
-        tmp = command.split(' ')
+        tmp = command.split()
         join(tmp[1])
     elif command == '/WHO':
-        who()
+        send_data("WHO")
     elif command == 'MSG':
-        tmp = command.split(' ')
+        tmp = command.split()
         private(tmp[1])
     elif command == '/LEAVE':
-        leave()
+        send_data("LEAVE")
     elif command == '/BYE':
-        disconnect()
+        send_data("BYE")
     elif command == '/KICK':
-        tmp = command.split(' ')
+        tmp = command.split()
         kick(tmp[1])
     elif command == '/KILL':
-        tmp = command.split(' ')
+        tmp = command.split()
         kill(tmp[1])
     elif command == '/BAN':
-        tmp = command.split(' ')
+        tmp = command.split()
         ban(tmp[1])
     elif command == '/REN':
-        tmp = command.split(' ')
+        tmp = command.split()
         rename(tmp[1])
     elif command == '/HELP':
-        help()
+        man()
     elif command.find('/'):
         print('Error. Unknown command, try "/HELP" to see the commands\n')
     else:
