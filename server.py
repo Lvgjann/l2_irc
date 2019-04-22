@@ -229,8 +229,13 @@ def disconnect(client):
     """
         Close the connection with the IRC server
     """
-    client.shutdown(1)
-    client.close()
+    try:
+        if get_channel_from_user(client):
+            leave(client)
+        client.shutdown(1)
+        client.close()
+    except Exception as e:
+        logging.exception(e)
 
 
 def kick(user, channel):
@@ -333,6 +338,8 @@ def start():
                 elif command == 'BAN':
                     ban(param[0])
                 else:
+                    print(data)
+                    client.sendall(data.encode())
                     continue
 
 
@@ -341,3 +348,4 @@ def start():
 main_connection = __init__()
 print("Init done\n")
 start()
+main_connection.close()

@@ -192,7 +192,7 @@ while True:
         rename(tmp[1])
     elif command == '/HELP':
         help_command()
-    elif command.find('/'):
+    elif command.find('/') == 0:
         print('Error. Unknown command, try "/HELP" to see the commands\n')
     else:
         send_data(command)
