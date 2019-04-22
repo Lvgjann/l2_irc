@@ -138,7 +138,7 @@ def ban(client):
         send_data("BAN %s" % client)
 
 
-def man():
+def help_command():
     print('/LIST : Display the current channels ;\n'
           '/JOIN + channel : Join the channel "channel". If it doesn\'t exist, create and join ;\n'
           '/WHO : Display the current user of the channel ;\n'
@@ -160,7 +160,7 @@ irc_conn()
 # Defines a nickname
 nickname = nick()
 print("You choose the nick %s, you can use the command below : \n" % nickname)
-help()
+help_command()
 
 while True:
     command = input('')
@@ -191,7 +191,7 @@ while True:
         tmp = command.split()
         rename(tmp[1])
     elif command == '/HELP':
-        man()
+        help_command()
     elif command.find('/'):
         print('Error. Unknown command, try "/HELP" to see the commands\n')
     else:
