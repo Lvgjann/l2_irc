@@ -3,6 +3,7 @@
 import logging
 import socket
 import sys
+import select
 
 irc = {
     'host': '',
@@ -39,7 +40,7 @@ def irc_conn():
     """
     try:
         print('Connecting to the server : {port}...'.format(**irc))
-        s.connect((irc['host'], irc['port']))
+        sock.connect((irc['host'], irc['port']))
     except socket.error:
         print('Error: Unable to connect to IRC server {host}:{port}'.format(**irc))
         sys.exit(1)
@@ -51,7 +52,7 @@ def send_data(data):
 
     :param data: Data block to send
     """
-    s.send(data.encode())
+    sock.send(data.encode())
 
 
 def join(channel):
@@ -151,48 +152,88 @@ def help_command():
           '-> /BAN + user : Disconnect the user "user" and blacklists the IP address ;\n')
 
 
-""" MAIN """
-
-# Opening a socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-# Connects to the IRC server
-irc_conn()
-# Defines a nickname
-nickname = nick()
-print("You choose the nick %s, you can use the command below : \n" % nickname)
-help_command()
-
-while True:
+def send_msg():
     command = input('')
+    
     if command == '/LIST':
         send_data("LIST")
     elif '/JOIN' in command:
         tmp = command.split()
-        join(tmp[1])
+        if (len(tmp) == 1):
+            print ('Please enter a channel :')
+            new = input('')
+            join(new)
+        else:
+            join(tmp[1])
     elif command == '/WHO':
         send_data("WHO")
     elif command == 'MSG':
         tmp = command.split()
-        private(tmp[1])
+        if (len(tmp) == 1):
+            print ('Please enter a name :')
+            new = input('')
+            private(new)
+        else:
+            private(tmp[1])
     elif command == '/LEAVE':
         send_data("LEAVE")
     elif command == '/BYE':
         send_data("BYE")
     elif command == '/KICK':
         tmp = command.split()
-        kick(tmp[1])
+        if (len(tmp) == 1):
+            print ('Please enter a name :')
+            new = input('')
+            kick(new)
+        else:
+            kick(tmp[1])
     elif command == '/KILL':
         tmp = command.split()
-        kill(tmp[1])
+        if (len(tmp) == 1):
+            print ('Please enter a name :')
+            new = input('')
+            kill(new)
+        else:
+            kill(tmp[1])
     elif command == '/BAN':
         tmp = command.split()
-        ban(tmp[1])
+        if (len(tmp) == 1):
+            print ('Please enter a name :')
+            new = input('')
+            ban(new)
+        else:
+            ban(tmp[1])
     elif command == '/REN':
         tmp = command.split()
-        rename(tmp[1])
+        if (len(tmp) == 1):
+            print ('Please enter a new name :')
+            new = input('')
+            rename(new)
+        else:
+            rename(tmp[1])
     elif command == '/HELP':
         help_command()
     elif command.find('/') == 0:
         print('Error. Unknown command, try "/HELP" to see the commands\n')
     else:
         send_data(command)
+
+
+""" MAIN """
+
+# Opening a socket
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+# Connects to the IRC server
+irc_conn()
+# Defines a nickname
+nickname = nick()
+print("You choose the nick %s, you can use the command below : \n" % nickname)
+help_command()
+tmp = []
+
+while True:
+    message = sock.recv(4096).decode()
+    if (message != ''):
+        print (message)
+    
+    send_msg()
