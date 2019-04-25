@@ -117,6 +117,12 @@ def is_error_get(f, param):
         return True
 
 
+def is_unique_nick(n):
+    if n in users:
+        return False
+    return True
+
+
 def nick(nickname, client):
     try:
         client_to_user.update({client: nickname})
@@ -317,7 +323,10 @@ def start():
                 # Read the command and the possible parameters
                 print('Command %s' % command)
                 if command == 'NICK':
-                    nick(param[0], client)
+                    if is_unique_nick(param[0]):
+                        nick(param[0], client)
+                    else:
+                        print('Error. Nickname already used.')
                 elif command == 'LIST':
                     print('Entering /list function')
                     channel_list()
@@ -346,6 +355,6 @@ def start():
 """ MAIN """
 
 main_connection = __init__()
-print("Init done\n")
+print("Initialization done.\n")
 start()
 main_connection.close()
