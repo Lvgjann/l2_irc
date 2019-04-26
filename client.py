@@ -154,67 +154,64 @@ def help_command():
 
 def send_msg():
     command = input('')
-    
+
     if command == '/LIST':
         send_data("LIST")
-    elif '/JOIN' in command:
-        tmp = command.split()
-        if (len(tmp) == 1):
-            print ('Please enter a channel :')
-            new = input('')
-            join(new)
-        else:
-            join(tmp[1])
     elif command == '/WHO':
         send_data("WHO")
-    elif command == 'MSG':
-        tmp = command.split()
-        if (len(tmp) == 1):
-            print ('Please enter a name :')
-            new = input('')
-            private(new)
-        else:
-            private(tmp[1])
     elif command == '/LEAVE':
         send_data("LEAVE")
     elif command == '/BYE':
         send_data("BYE")
-    elif command == '/KICK':
-        tmp = command.split()
-        if (len(tmp) == 1):
-            print ('Please enter a name :')
-            new = input('')
-            kick(new)
-        else:
-            kick(tmp[1])
-    elif command == '/KILL':
-        tmp = command.split()
-        if (len(tmp) == 1):
-            print ('Please enter a name :')
-            new = input('')
-            kill(new)
-        else:
-            kill(tmp[1])
-    elif command == '/BAN':
-        tmp = command.split()
-        if (len(tmp) == 1):
-            print ('Please enter a name :')
-            new = input('')
-            ban(new)
-        else:
-            ban(tmp[1])
-    elif command == '/REN':
-        tmp = command.split()
-        if (len(tmp) == 1):
-            print ('Please enter a new name :')
-            new = input('')
-            rename(new)
-        else:
-            rename(tmp[1])
     elif command == '/HELP':
         help_command()
-    elif command.find('/') == 0:
-        print('Error. Unknown command, try "/HELP" to see the commands\n')
+    elif '/' in command:
+        tmp.append((command.split()))
+        if '/JOIN' in command:
+            if len(tmp) == 1:
+                print('Please enter a channel :')
+                new = input('')
+                join(new)
+            else:
+                join(tmp[1])
+        elif command == 'MSG':
+            if len(tmp) == 1:
+                print('Please enter a name :')
+                new = input('')
+                private(new)
+            else:
+                private(tmp[1])
+
+        elif command == '/KICK':
+            if len(tmp) == 1:
+                print('Please enter a name :')
+                new = input('')
+                kick(new)
+            else:
+                kick(tmp[1])
+        elif command == '/KILL':
+            if len(tmp) == 1:
+                print('Please enter a name :')
+                new = input('')
+                kill(new)
+            else:
+                kill(tmp[1])
+        elif command == '/BAN':
+            if len(tmp) == 1:
+                print('Please enter a name :')
+                new = input('')
+                ban(new)
+            else:
+                ban(tmp[1])
+        elif command == '/REN':
+            if len(tmp) == 1:
+                print('Please enter a new name :')
+                new = input('')
+                rename(new)
+            else:
+                rename(tmp[1])
+        elif command.find('/') == 0:
+            print('Error. Unknown command, try "/HELP" to see the commands\n')
     else:
         send_data(command)
 
@@ -233,7 +230,7 @@ tmp = []
 
 while True:
     message = sock.recv(4096).decode()
-    if (message != ''):
-        print (message)
-    
+    if message != '':
+        print(message)
+
     send_msg()
