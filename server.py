@@ -374,7 +374,7 @@ def start():
             for client in waiting_clients:
                 data, ip = client.recvfrom(4096)
                 data = data.decode()
-                print ("data :" + data)
+                print("data :" + data)
                 # Split the received data into 'command + parameter[i..n]' format
                 tmp = data.split()
                 command = tmp[0]
