@@ -1,29 +1,22 @@
-CLIENT
+V0 : 
+OK -> /HELP: print this message
+OK -> /LIST: list all available channels on server
+OK -> /JOIN <channel>: join (or create) a channel
+OK -> /LEAVE: leave current channel
+OK -> /WHO: list users in current channel
+OK -> <message>: send a message in current channel
+TODO -> /MSG <nick> <message>: send a private message in current channel
+TODO -> /BYE: disconnect from server
+TODO -> /KICK <nick>: kick user from current channel [admin]
+TODO -> /REN <channel>: change the current channel name [admin]
 
-OK : Le client voit la liste des canaux en cours (commande LIST)
-OK : Le client rejoint un canal ("channel") de communication (commande JOIN). Si le canal n'existe pas, il est créé.
-OK : Le client peut voir la liste des participants (commande WHO)
-OK : Le client discute avec les autres clients connectés sur le canal (pas de commande) ou en privé avec un autre client du canal (commande PRV_MSG nick)
-OK : A tout moment, le client peut quitter le canal (commande LEAVE) pour en choisir un autre (JOIN) ou se déconnecter du serveur (commande BYE. Il faut quitter le canal avant de pouvoir utiliser cette commande).
-
-Le premier client connecté sur un canal devient l'administrateur du canal. Il doit être identifié comme tel dans la liste des participants (commande WHO, par exemple en affichant son nom de la façon suivante : @nick@). L'administrateur peut en plus utiliser les commandes suivantes:
-OK : KICK nick : sort le client concerné du canal (équivalent de LEAVE)
-OK : KILL nick : déconnecte brutalement le client du serveur (équivalent de BYE mais sans se préoccuper du canal)
-OK : BAN nick : déconnecte le client (comme KILL) et l'ajoute (son adresse IP) dans une liste de clients interdits
-
-SERVER
-
-WIP : Le client se connecte au serveur (le port 194 (IRC) ne pouvant pas être utilisé, on utilisera par défaut le port 1459)
-Au moment de la connexion, le client est invité à choisir un "nick" avant de pouvoir faire autre chose.
-OK : Le client voit la liste des canaux en cours (commande LIST)
-OK : Le client rejoint un canal ("channel") de communication (commande JOIN). Si le canal n'existe pas, il est créé.
-OK : Le client peut voir la liste des participants (commande WHO)
-WIP : Le client discute avec les autres clients connectés sur le canal (pas de commande) ou en privé avec un autre client du canal (commande PRV_MSG nick)
-OK : A tout moment, le client peut quitter le canal (commande LEAVE) pour en choisir un autre (JOIN) ou se déconnecter du serveur (commande BYE. Il faut quitter le canal avant de pouvoir utiliser cette commande).
-OK : Le premier client connecté sur un canal devient l'administrateur du canal. Il doit être identifié comme tel dans la liste des participants (commande WHO, par exemple en affichant son nom de la façon suivante : @nick@). L'administrateur peut en plus utiliser les commandes suivantes:
-KICK nick : sort le client concerné du canal (équivalent de LEAVE)
-KILL nick : déconnecte brutalement le client du serveur (équivalent de BYE mais sans se préoccuper du canal)
-BAN nick : déconnecte le client (comme KILL) et l'ajoute (son adresse IP) dans une liste de clients interdits
-Remarques
-Le dernier client a quitter le canal entraîne la fermeture de ce canal
-Savoir si l'utilisateur est admin ou pas
+V1 :
+TODO -> /CURRENT: print current channel name
+TODO -> /CURRENT <channel>: set current channel
+TODO -> /MSG <nick1;nick2;...> <message>: send a private message to several users in current channel
+TODO -> /NICK <nick>: change user nickname on server
+TODO -> /GRANT <nick>: grant admin privileges to a user [admin]
+TODO -> /REVOKE <nick>: revoke admin privileges [admin]
+TODO -> /SEND <nick> </path/to/file>: send a file to a remote user
+TODO -> /RECV </path/to/file>: receive a file and save it locally
+TODO -> /HISTORY: print history of current channel (saved by server)
