@@ -227,12 +227,14 @@ def set_admin(user):
     user = '@' + user + '@'
     return user
 
+
 def revoke(user):
     if not is_admin(user):
-        print ('ERROR : %d isn\'t admin !' % user)
+        print('ERROR : %d isn\'t admin !' % user)
     else:
         a = user.split('@')
     return a[1]
+
 
 def private(user, message):
     """
@@ -335,12 +337,9 @@ def send_msg_channel(msg, user):
     if channel is not None:
         list_user = get_users_from_channel(channel)
         for c in list_user:
-            print ("boucle")
-            print (c)
-            print (user)
             if (c != user) and (c != set_admin(user)):
-                print ("enter")
-                if (is_admin(c)):
+                print("enter")
+                if is_admin(c):
                     c = revoke(c)
                 client = get_client_from_user(c)
                 client.sendall(msg.encode())
@@ -431,13 +430,13 @@ def start():
 
                 elif command == 'BAN':
                     ban(param[0])
-                
+
                 elif command == 'ERROR':
                     print('Entering wrong function')
                     message = 'Error. Unknown command, try "/HELP" to see the commands\n'
-                
+
                 elif command == 'ACK':
-                    print ("message ACK")
+                    print("message ACK")
                     message = ''
 
                 else:
