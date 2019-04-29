@@ -7,16 +7,12 @@ import sys
 import threading
 import tty
 
-banlist = {
-    # Nick[string] : IP[string]
-}
-client_to_user = {
+clients = {
     # Client[string] : Nick[string]
 }
 users = {
     # Nick[string] : IP[string]      
 }
-dead = []
 channels = {
     # Name channel[string] : List of users[list]
 }
@@ -73,7 +69,7 @@ def get_client_from_user(user):
     :return: client matching to its user
     """
     try:
-        for c, n in client_to_user.items():
+        for c, n in clients.items():
             if n == user:
                 return c
         return ""
@@ -87,7 +83,7 @@ def get_user_from_client(client):
     :return: the user matching to its client.
     """
     try:
-        usr = client_to_user.get(client)
+        usr = clients.get(client)
         return usr if usr else ""
     except Exception as e:
         __log__('Cannot find the target user.', e)
@@ -186,7 +182,7 @@ def nick(nickname, client):
     :param client: Client to update.
     """
     try:
-        client_to_user.update({client: nickname})
+        clients.update({client: nickname})
         users.update({nickname: "127.0.0.1"})
         print('<%s> is connected.' % nickname)
     except Exception as e:
@@ -251,6 +247,20 @@ def set_admin(user):
         __log__('Invalid user.', e)
 
 
+def set_new_admin(user):
+    """
+        Set a user as admin
+    :param user: The target user.
+    """
+    try:
+        channel = get_channel_from_user(user)
+        new_user = set_admin(user)
+        channels[channel].remove(user)
+        channels[channel].append(new_user)
+    except Exception as e:
+        __log__('Invalid user.', e)
+
+
 def revoke(user):
     """
         Set an admin to simple user.
@@ -273,24 +283,55 @@ def delete_channel(channel):
         __log__('Invalid channel.', e)
 
 
+def remove_user_from_channel(user):
+    channel = get_channel_from_user(user)
+    list_user = get_users_from_channel(channel)
+    
+    if user in list_user:
+        list_user.remove(user)
+    elif set_admin(user) in list_user:
+        list_user.remove(set_admin(user))
+
+
 def leave(user):
     """
         Remove an user from a channel.
     :param user: User to remove.
     """
     try:
+        new_admin = False
         channel = get_channel_from_user(user)
+
         if is_admin(user):
+            new_admin = True
+
+        remove_user_from_channel(user)
+        list_user = get_users_from_channel(channel)
+        print("in leave")
+        print(list_user)
+
+        if list_user == []:
             delete_channel(channel)
-        else:
-            list_user = get_users_from_channel(channel)
-            if user in list_user:
-                list_user.remove(user)
-            elif set_admin(user) in list_user:
-                list_user.remove(set_admin(user))
+        elif new_admin:
+            set_new_admin(list_user[0])
             channels[channel] = list_user
+            print("in leave new admin")
+            print(list_user)
+        else:
+            channels[channel] = list_user
+            
     except Exception as e:
         __log__('Cannot find user or channel.', e)
+
+
+def remove_client_user(client):
+    try:
+        user = get_user_from_client(client)
+        del users[user]
+        del clients[clients]
+    except Exception as e:
+        __log__('Error : This client didn\'t exist.', e)
+        
 
 
 def rename(name, client):
@@ -338,7 +379,7 @@ def kick(user, channel):
         __log__("Invalid user or channel.", e)
 
 
-def kill(client):
+"""def kill(client):
     try:
         usr = get_user_from_client(client)
         c = get_channel_from_user(client)
@@ -346,10 +387,10 @@ def kill(client):
         # Close connection
         disconnect(client)
     except Exception as e:
-        __log__('Cannot find target client.', e)
+        __log__('Cannot find target client.', e)"""
 
 
-def ban(client):
+"""def ban(client):
     try:
         usr = get_user_from_client(client)
         c = get_channel_from_user(client)
@@ -358,7 +399,7 @@ def ban(client):
         banlist.update(usr)
         disconnect(client)
     except Exception as e:
-        __log__('Cannot find target client.', e)
+        __log__('Cannot find target client.', e)"""
 
 
 def private_message(client, msg, sender):
@@ -412,6 +453,7 @@ def start():
     print('Starting server...')
     connected_clients = []
     while True:
+        dead = []
         message = ''
         channel_msg = False
         # Verifying if new clients want to connect.
@@ -515,7 +557,9 @@ def start():
 
                 client.sendall(message.encode())
         for d in dead:
+            remove_client_user(d)
             d.close()
+        
 
 
 """ MAIN """
