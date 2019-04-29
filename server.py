@@ -150,6 +150,18 @@ def is_unique_nick(n):
     return True
 
 
+def is_admin(user):
+    """
+        return true if the user is administrator
+    :param user: The target user.
+    """
+    try:
+        return user.startswith('@') and user.endswith('@')
+    except Exception as e:
+        print('Error: Cannot find user %s.' % user)
+        logging.exception(e)
+
+
 def nick(nickname, client):
     try:
         client_to_user.update({client: nickname})
@@ -207,18 +219,6 @@ def who(channel):
         logging.exception(e)
 
 
-def is_admin(user):
-    """
-        return true if the user is administrator
-    :param user: The target user.
-    """
-    try:
-        return user.startswith('@') and user.endswith('@')
-    except Exception as e:
-        print('Error: Cannot find user %s.' % user)
-        logging.exception(e)
-
-
 def set_admin(user):
     """
         set a user as admin
@@ -229,11 +229,12 @@ def set_admin(user):
 
 
 def revoke(user):
-    if not is_admin(user):
-        print('ERROR : %d isn\'t admin !' % user)
-    else:
-        a = user.split('@')
-    return a[1]
+    try:
+        if is_admin(user):
+            return user.split('@')
+    except Exception as e:
+        print('Error: %s is not administrator.' % user)
+        logging.exception(e)
 
 
 def private(user, message):
