@@ -291,6 +291,20 @@ def leave(user):
         logging.exception(e)
 
 
+def rename(name, client):
+    try:
+        message = ''
+        if name in channels:
+            message = ("This channel already exist, please try again with another name.\n")
+        channel = get_channel_from_user(get_user_from_client(client))
+        list_users = channels[channel]
+        delete_channel(channel)
+        channels.update({name: list_users})
+        return (message)
+    except Exception as e:
+        print('Error : Cannot find user or channel.')
+        logging.exception(e)
+
 def disconnect(client):
     """
         Close the connection with the IRC server
@@ -470,6 +484,13 @@ def start():
 
                 elif command == 'HELP':
                     message = help_command()
+
+                elif command == 'REN':
+                    test = rename(param[0], client)
+                    channel = get_channel_from_user(get_user_from_client(client))
+                    if test == '': 
+                        message = "Channel %s was rename to %s" % (channel, param[0])
+                        print(message)
 
                 elif command == 'ERROR':
                     print('Entering wrong function')
