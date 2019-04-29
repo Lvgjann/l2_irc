@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6ca3f10f-8925-43f0-b3b0-7f182c14d8f4" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client.py" beforeDir="false" afterPath="$PROJECT_DIR$/client.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -17,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/server.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="395">
-              <caret line="242" column="24" selection-start-line="242" selection-start-column="24" selection-end-line="242" selection-end-column="24" />
+            <state relative-caret-position="515">
+              <caret line="497" column="54" lean-forward="true" selection-start-line="497" selection-start-column="54" selection-end-line="497" selection-end-column="54" />
               <folding>
                 <element signature="e#20#34#0" expanded="true" />
               </folding>
@@ -29,8 +27,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/client.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1115">
-              <caret line="174" column="17" lean-forward="true" selection-start-line="174" selection-start-column="17" selection-end-line="174" selection-end-column="17" />
+            <state relative-caret-position="535">
+              <caret line="193" column="35" selection-start-line="193" selection-start-column="31" selection-end-line="193" selection-end-column="35" />
             </state>
           </provider>
         </entry>
@@ -40,6 +38,11 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>user</find>
+      <find>private</find>
+      <find>nick</find>
+      <find>NET</find>
+      <find>INET</find>
+      <find>NICK</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -49,8 +52,8 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$APPLICATION_CONFIG_DIR$/idea.properties" />
-        <option value="$PROJECT_DIR$/server.py" />
         <option value="$PROJECT_DIR$/client.py" />
+        <option value="$PROJECT_DIR$/server.py" />
       </list>
     </option>
   </component>
@@ -154,11 +157,12 @@
       <workItem from="1556193845573" duration="5123000" />
       <workItem from="1556296547390" duration="591000" />
       <workItem from="1556312924670" duration="3245000" />
+      <workItem from="1556536856477" duration="7550000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="24750000" />
+    <option name="totallyTimeSpent" value="32300000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -173,11 +177,11 @@
     <frame x="-8" y="-8" width="1874" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20837927" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.21058434" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32917964" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32917964" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
@@ -212,15 +216,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/client.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1115">
-          <caret line="174" column="17" lean-forward="true" selection-start-line="174" selection-start-column="17" selection-end-line="174" selection-end-column="17" />
+        <state relative-caret-position="535">
+          <caret line="193" column="35" selection-start-line="193" selection-start-column="31" selection-end-line="193" selection-end-column="35" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/server.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="395">
-          <caret line="242" column="24" selection-start-line="242" selection-start-column="24" selection-end-line="242" selection-end-column="24" />
+        <state relative-caret-position="515">
+          <caret line="497" column="54" lean-forward="true" selection-start-line="497" selection-start-column="54" selection-end-line="497" selection-end-column="54" />
           <folding>
             <element signature="e#20#34#0" expanded="true" />
           </folding>

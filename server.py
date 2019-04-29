@@ -30,44 +30,47 @@ def __init__():
     """
         Initialize the server socket
     """
-    sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind((irc['host'], irc['port']))
     sock.listen(5)
     return sock
 
 
+""" GETTERS AND CHECKERS """
+
+
+def __log__(err, e):
+    print('Error: %s' % err)
+    logging.exception(e)
+
+
 def get_channel(channel):
     """
-        Returns the channel from the channel list.
-
     :param channel: Searched channel.
+    :return: channel from the channel list.
     """
     try:
         return channels[channel]
     except Exception as e:
-        print('Error: Cannot find the channel %s.' % channel)
-        logging.exception(e)
+        __log__('Cannot find the channel %s.' % channel, e)
 
 
-def get_user(n):
+def get_user(u):
     """
-        Return the user from the user list.
-
-     :param n: Searched user.
+     :param u: Searched user.
+     :return: the user from the usr list.
     """
     try:
-        return users[n]
+        return users[u]
     except Exception as e:
-        print('Error: Cannot find the user %s.' % n)
-        logging.exception(e)
+        __log__('Cannot find the user %s.' % u, e)
 
 
 def get_client_from_user(user):
     """
-        Return the client matching to its user.
-
     :param user: User to match
+    :return: client matching to its user
     """
     try:
         for c, n in client_to_user.items():
@@ -75,55 +78,37 @@ def get_client_from_user(user):
                 return c
         return ""
     except Exception as e:
-        print('Error: Cannot find the matching user.')
-        logging.exception(e)
+        __log__('Cannot find the target client.', e)
 
 
 def get_user_from_client(client):
     """
-        Return the user matching to its client.
-
     :param client: Client to match
+    :return: the user matching to its client.
     """
     try:
         usr = client_to_user.get(client)
-        if usr:
-            return usr
-        else:
-            return ""
+        return usr if usr else ""
     except Exception as e:
-        print('Error: Cannot find the matching user.')
-        logging.exception(e)
+        __log__('Cannot find the target user.', e)
 
 
 def get_users_from_channel(channel):
     """
-        Return the users from a channel.
-
     @:param channel: Searched channel.
+    :return: the users from a channel.
     """
     try:
         c = channels.get(channel)
         return c
     except Exception as e:
-        print('Error: Cannot find the matching channel.')
-        logging.exception(e)
-
-
-def is_in_channel(user):
-    for k, v in channels.items():
-        if user in v:
-            return True
-        elif (set_admin(user)) in v:
-            return True
-    return False
+        __log__('Cannot find the target users.', e)
 
 
 def get_channel_from_user(user):
     """
-        Return the channel from an user.
-
     :param user: Searched user.
+    :return: the channel from a user in it.
     """
     try:
         for k, v in channels.items():
@@ -136,52 +121,76 @@ def get_channel_from_user(user):
         logging.exception(e)
 
 
+def is_in_channel(u):
+    """
+    :return: if the user u is in the channel.
+    """
+    for k, v in channels.items():
+        if u in v:
+            return True
+        elif (set_admin(u)) in v:
+            return True
+    return False
+
+
 def is_error_get(f, param):
+    """
+    :return: if something is going wrong. Basically, it should not, let's just hope it keeps going on this way. Please.
+    """
     try:
         f(param)
         return False
     except Exception as e:
-        logging.exception(e)
-        return True
+        __log__('Just. Error.', e)
 
 
 def is_unique_nick(n):
-    if n in users:
-        return False
-    return True
-
-
-def is_admin(user):
+    """
+    :return: if the nick n is unique.
+    """
     try:
-        channel = get_channel_from_user(user)
-        if set_admin(user) in channels[channel]:
-            return True
-        return False
+        return n in users
     except Exception as e:
-        print('Error: Cannot find user %s.' % user)
-        logging.exception(e)
+        __log__('Cannot find any user with nickname %s' % n, e)
+
+
+def is_admin(u):
+    """
+    :return: if the user u is an administrator.
+    """
+    try:
+        channel = get_channel_from_user(u)
+        return set_admin(u) in channels[channel]
+    except Exception as e:
+        __log__('Cannot find user %s.' % u, e)
 
 
 def test_admin(user):
     """
-        return true if the user is administrator
+        Return true if the user is administrator
     :param user: The target user.
     """
     try:
         return user.startswith('@') and user.endswith('@')
     except Exception as e:
-        print('Error: Cannot find user %s.' % user)
-        logging.exception(e)
+        __log__('Cannot find the target user %s' % user, e)
+
+
+""" IRC FUNCTIONS """
 
 
 def nick(nickname, client):
+    """
+        Define or redefine a nickname for a client
+    :param nickname: Nickname to update.
+    :param client: Client to update.
+    """
     try:
         client_to_user.update({client: nickname})
-        users.update({nickname: "ffff:127.0.0.1"})
+        users.update({nickname: "127.0.0.1"})
         print('<%s> is connected.' % nickname)
     except Exception as e:
-        print('Error: Invalid client or nickname.')
-        logging.exception(e)
+        __log__('Invalid client or nickname.', e)
 
 
 def channel_list():
@@ -189,37 +198,35 @@ def channel_list():
         Display the channel list.
     """
     print('Active channels : \n')
-    msg = ''
-    for c in channels.keys():
-        print(c)
-        msg = msg + c + '\n'
-    if msg == '':
-        msg = "There is no channel active on this server."
+    if channels:
+        msg = ''
+        for c in channels.keys():
+            print(c)
+            msg = msg + c + '\n'
+    else:
+        msg = "There is no active channel on this server."
     return msg
 
 
 def join(channel, user):
     """
         Add an user to a channel
-
     :param user: Joining user.
     :param channel: Target channel.
     """
     try:
-        if channel not in channels:
+        if channel in channels:
+            channels[channel].append(user)
+        else:
             channels.update({channel: [set_admin(user)]})
             print('Created channel %s.' % channel)
-        else:
-            channels[channel].append(user)
     except Exception as e:
-        print('Error: Cannot join or create the channel %s.' % channel)
-        logging.exception(e)
+        __log__('Cannot join or create the channel %s.' % channel, e)
 
 
 def who(channel):
     """
         Display the present users in a channel.
-
     :param channel: The target channel.
     """
     msg = 'Users in the channel ' + channel + ':\n'
@@ -229,50 +236,46 @@ def who(channel):
             msg = msg + u + '\n'
         return msg
     except Exception as e:
-        print('Error: Cannot find the channel %s' % channel)
-        logging.exception(e)
+        __log__('Cannot find target channel.', e)
 
 
 def set_admin(user):
     """
-        set a user as admin
-    :param user: the target user.
+        Set a user as admin
+    :param user: The target user.
     """
-    user = '@' + user + '@'
-    return user
+    try:
+        user = '@' + user + '@'
+        return user
+    except Exception as e:
+        __log__('Invalid user.', e)
 
 
 def revoke(user):
-    try:
-        if is_admin(user):
-            return user.split('@')[1]
-    except Exception as e:
-        print('Error: %s is not administrator.' % user)
-        logging.exception(e)
-
-
-def private(user, message):
     """
-        Sends a private message to an user.
-
+        Set an admin to simple user.
     :param user: The target user.
     """
-    # TODO : complete the function
+    try:
+        return user.split('@')[1] if is_admin(user) else ""
+    except Exception as e:
+        __log__('Invalid user.', e)
 
 
 def delete_channel(channel):
     """
-        Removes a channel.
-        
+        Remove a channel.
     :param channel: The target channel.
     """
-    del channels[channel]
+    try:
+        del channels[channel]
+    except Exception as e:
+        __log__('Invalid channel.', e)
 
 
 def leave(user):
     """
-        Remove an user from a channel
-
+        Remove an user from a channel.
     :param user: User to remove.
     """
     try:
@@ -287,49 +290,55 @@ def leave(user):
                 list_user.remove(set_admin(user))
             channels[channel] = list_user
     except Exception as e:
-        print('Error : Cannot find user or channel.')
-        logging.exception(e)
+        __log__('Cannot find user or channel.', e)
 
 
 def rename(name, client):
+    """
+        Rename a channel.
+    :param name: New channel name.
+    :param client: Client currently in the channel.
+    """
     try:
-        message = ''
         if name in channels:
-            message = ("This channel already exist, please try again with another name.\n")
-        channel = get_channel_from_user(get_user_from_client(client))
-        list_users = channels[channel]
-        delete_channel(channel)
-        channels.update({name: list_users})
-        return (message)
+            message = "This channel already exist, please try again with another name.\n"
+        else:
+            channel = get_channel_from_user(get_user_from_client(client))
+            users_to_keep = channels[channel]
+            delete_channel(channel)
+            channels.update({name: users_to_keep})
+            message = "Channel %s was rename to %s" % (channel, name)
+        return message
     except Exception as e:
-        print('Error : Cannot find user or channel.')
-        logging.exception(e)
+        __log__('Cannot find user or channel.', e)
+
 
 def disconnect(client):
     """
         Close the connection with the IRC server
     """
-    # TODO : Correct this shit
     try:
         if get_channel_from_user(client):
             leave(client)
         users.pop(get_user_from_client(client))
         client.shutdown(1)
     except Exception as e:
-        logging.exception(e)
+        __log__("Cannot find targe client.", e)
 
 
 def kick(user, channel):
     """
-        Remove an user from a channel
-
+        Remove an user from its channel
     :param user: The target user.
     :param channel: The target channel.
     """
-    channels[channel].remove(user)
+    try:
+        channels[channel].remove(user)
+    except Exception as e:
+        __log__("Invalid user or channel.", e)
 
 
-"""def kill(client):
+def kill(client):
     try:
         usr = get_user_from_client(client)
         c = get_channel_from_user(client)
@@ -337,11 +346,10 @@ def kick(user, channel):
         # Close connection
         disconnect(client)
     except Exception as e:
-        print('Error: cannot find target client.')
-        logging.exception(e)"""
+        __log__('Cannot find target client.', e)
 
 
-"""def ban(client):
+def ban(client):
     try:
         usr = get_user_from_client(client)
         c = get_channel_from_user(client)
@@ -350,24 +358,26 @@ def kick(user, channel):
         banlist.update(usr)
         disconnect(client)
     except Exception as e:
-        print('Error: cannot find target client.')
-        logging.exception(e)"""
+        __log__('Cannot find target client.', e)
 
 
-def private(client, msg, sender):
+def private_message(client, msg, sender):
+    """
+        Send a private to an user.
+    :param client: Target client.
+    :param msg: Message to send.
+    :param sender: Client who sends the message.
+    """
     try:
-        message = '<%s> is wispering you - ' % sender
-        message = message + msg
+        message = '<%s> is wispering to you - ' % sender + msg
         client.sendall(message.encode())
     except Exception as e:
-        print ('Error: the client didn\'t exit.\n')
-        logging.exception(e)
+        __log__('Cannot find target client.', e)
 
 
-def send_msg_channel(msg, user):
+def channel_message(msg, user):
     channel = get_channel_from_user(user)
-    message = '<%s> - ' % user
-    message = message + msg
+    message = '<%s> - ' % user + msg
 
     if channel is not None:
         list_user = get_users_from_channel(channel)
@@ -381,17 +391,17 @@ def send_msg_channel(msg, user):
 
 def help_command():
     return ('\n\nThis is the list of the commands available on this server :\n'
-        '-> /HELP: print this message ;\n'
-        '-> /LIST: list all available channels on server ;\n'
-        '-> /JOIN <channel>: join (or create) a channel ;\n'
-        '-> /LEAVE: leave current channel ;\n'
-        '-> /WHO: list users in current channel ;\n'
-        '-> <message>: send a message in current channel ;\n'
-        '-> /MSG <nick> <message>: send a private message in current channel ;\n'
-        '-> /BYE: disconnect from server ;\n'
-        '\nIf you\'re admin on your channel :\n'
-        '--> /KICK <nick>: kick user from current channel [admin] ;\n'
-        '--> /REN <channel>: change the current channel name [admin] ;\n')
+            '-> /HELP: print this message ;\n'
+            '-> /LIST: list all available channels on server ;\n'
+            '-> /JOIN <channel>: join (or create) a channel ;\n'
+            '-> /LEAVE: leave current channel ;\n'
+            '-> /WHO: list users in current channel ;\n'
+            '-> <message>: send a message in current channel ;\n'
+            '-> /MSG <nick> <message>: send a private message in current channel ;\n'
+            '-> /BYE: disconnect from server ;\n'
+            '\nIf you\'re admin on your channel :\n'
+            '--> /KICK <nick>: kick user from current channel [admin] ;\n'
+            '--> /REN <channel>: change the current channel name [admin] ;\n')
 
 
 def start():
@@ -399,7 +409,6 @@ def start():
         Start and loop the IRC server.
     """
     # tty.setraw(sys.stdin)
-    global alive
     print('Starting server...')
     connected_clients = []
     while True:
@@ -426,7 +435,7 @@ def start():
                 tmp = data.split()
                 command = tmp[0]
                 param = []
-                for p in range (1, len(tmp)):
+                for p in range(1, len(tmp)):
                     param.append(tmp[p])
                 # Read the command and the possible parameters
 
@@ -459,13 +468,13 @@ def start():
                         message = 'You are not in a channel.'
 
                 elif command == 'MSG':
-                    private(get_client_from_user(param[0]), param[1], get_user_from_client(client))
+                    private_message(get_client_from_user(param[0]), param[1], get_user_from_client(client))
 
                 elif command == 'LEAVE':
                     print('Entering /LEAVE function')
                     old_channel = get_channel_from_user(get_user_from_client(client))
                     leave(get_user_from_client(client))
-                    message = "You leave the channel %s\n" % old_channel
+                    message = "You left the channel %s\n" % old_channel
                     print('<%s> has left the channel %s.' % (get_user_from_client(client), old_channel))
 
                 elif command == 'BYE':
@@ -486,14 +495,11 @@ def start():
                     message = help_command()
 
                 elif command == 'REN':
-                    test = rename(param[0], client)
-                    channel = get_channel_from_user(get_user_from_client(client))
-                    if test == '': 
-                        message = "Channel %s was rename to %s" % (channel, param[0])
-                        print(message)
+                    message = rename(param[0], client)
+                    print(message)
 
                 elif command == 'ERROR':
-                    print('Entering wrong function')
+                    print('Error case. Something has gone wrong.')
                     message = 'Error. Unknown command, try "/HELP" to see the commands\n'
 
                 elif command == 'ACK':
@@ -504,7 +510,7 @@ def start():
                     channel_msg = True
 
                 if channel_msg:
-                    send_msg_channel(message, get_user_from_client(client))
+                    channel_message(message, get_user_from_client(client))
                     message = ''
 
                 client.sendall(message.encode())
