@@ -68,7 +68,7 @@ def join(channel):
         __log__(e)
 
 
-def nick():
+def nick_first():
     """
         Define a nick for a user.
 
@@ -82,9 +82,22 @@ def nick():
         __log__(e)
 
 
+def nick(n):
+    """
+        Define a nick for a user.
+
+    """
+    try:
+        send_data('NICK %s' % n)
+    except Exception as e:
+        print('Error: nickname cannnot be empty.')
+        __log__(e)
+
+
 def private(usr, msg):
     """
         Send a private message to an user
+    :param msg:
     :param usr
     """
     try:
@@ -117,6 +130,7 @@ def kick(client):
     """
     if is_client_valid(client):
         send_data("KICK %s" % client)
+
 
 def send_msg():
     i, o, e = select.select([sys.stdin], [], [], 0.5)
@@ -157,7 +171,8 @@ def send_msg():
                 if len(tmp[0]) <= 2:
                     print('Please enter a name and a message :')
                     new = input('')
-                    private(new)
+                    new = new.split()
+                    private(new[0], new[1])
                 else:
                     private(tmp[0][1], tmp[0][2])
 
@@ -177,6 +192,14 @@ def send_msg():
                 else:
                     rename(tmp[0][1])
 
+            elif 'NICK' in command:
+                if len(tmp[0]) == 1:
+                    print('Please enter a nickname : ')
+                    new = input()
+                    nick(new)
+                else:
+                    nick(tmp[0][1])
+
             # it's an unkown command
             else:
                 send_data("ERROR")
@@ -195,7 +218,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
 # Connects to the IRC server
 irc_conn()
 # Defines a nickname
-nickname = nick()
+nickname = nick_first()
 print("You choose the nick %s, to see the commands, entered '/HELP' \n" % nickname)
 
 while True:

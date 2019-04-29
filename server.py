@@ -149,7 +149,7 @@ def is_unique_nick(n):
     :return: if the nick n is unique.
     """
     try:
-        return n in users
+        return n in users.keys()
     except Exception as e:
         __log__('Cannot find any user with nickname %s' % n, e)
 
@@ -441,7 +441,7 @@ def start():
 
                 if command == 'NICK':
                     print('Entering /NICK function')
-                    if is_unique_nick(param[0]):
+                    if not is_unique_nick(param[0]):
                         nick(param[0], client)
                         message = 'Your nick is : %s\n' % param[0]
 
