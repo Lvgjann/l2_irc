@@ -153,7 +153,10 @@ def help_command():
 
 
 def send_msg():
-    command = input('')
+    try:
+        command = input('')
+    except:
+        command = 'ACK'
 
     if command == '/LIST':
         send_data("LIST")
@@ -165,8 +168,10 @@ def send_msg():
         send_data("BYE")
     elif command == '/HELP':
         help_command()
+
     elif '/' in command:
-        tmp.append((command.split(' ')))
+        tmp.append((command.split()))
+
         if '/JOIN' in command:
             if len(tmp[0]) == 1:
                 print('Please enter a channel :')
@@ -174,6 +179,7 @@ def send_msg():
                 join(new)
             else:
                 join(tmp[0][1])
+
         elif command == 'MSG':
             if len(tmp[0]) == 1:
                 print('Please enter a name :')
@@ -189,6 +195,7 @@ def send_msg():
                 kick(new)
             else:
                 kick(tmp[0][1])
+
         elif command == '/KILL':
             if len(tmp[0]) == 1:
                 print('Please enter a name :')
@@ -196,6 +203,7 @@ def send_msg():
                 kill(new)
             else:
                 kill(tmp[0][1])
+
         elif command == '/BAN':
             if len(tmp[0]) == 1:
                 print('Please enter a name :')
@@ -203,6 +211,7 @@ def send_msg():
                 ban(new)
             else:
                 ban(tmp[0][1])
+
         elif command == '/REN':
             if len(tmp[0]) == 1:
                 print('Please enter a new name :')
@@ -210,10 +219,12 @@ def send_msg():
                 rename(new)
             else:
                 rename(tmp[0][1])
-        elif command.find('/') == 0:
-            command = "ERROR"            
-        else:
-            send_data(command)
+
+        else :
+            send_data ("ERROR")  
+
+    else:
+        send_data(command)
 
 
 """ MAIN """

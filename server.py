@@ -182,7 +182,6 @@ def join(channel, user):
     try:
         if channel not in channels:
             channels.update({channel: [set_admin(user)]})
-            print(channel)
             print('Created channel %s.' % channel)
         else:
             channels[channel].append(user)
@@ -228,6 +227,12 @@ def set_admin(user):
     user = '@' + user + '@'
     return user
 
+def revoke(user):
+    if not is_admin(user):
+        print ('ERROR : %d isn\'t admin !' % user)
+    else:
+        a = user.split('@')
+    return a[1]
 
 def private(user, message):
     """
@@ -326,17 +331,18 @@ def ban(client):
 
 def send_msg_channel(msg, user):
     channel = get_channel_from_user(user)
+
     if channel is not None:
-        print("in channel %s:" % channel)
         list_user = get_users_from_channel(channel)
-        print(list_user)
-        print("(" + user + ")")
         for c in list_user:
-            print(c)
-            print(user)
-            if c != user:
+            print ("boucle")
+            print (c)
+            print (user)
+            if (c != user) and (c != set_admin(user)):
+                print ("enter")
+                if (is_admin(c)):
+                    c = revoke(c)
                 client = get_client_from_user(c)
-                print(client)
                 client.sendall(msg.encode())
                 # print (c)
 
@@ -429,6 +435,10 @@ def start():
                 elif command == 'ERROR':
                     print('Entering wrong function')
                     message = 'Error. Unknown command, try "/HELP" to see the commands\n'
+                
+                elif command == 'ACK':
+                    print ("message ACK")
+                    message = ''
 
                 else:
                     message = data
@@ -436,7 +446,6 @@ def start():
 
                 if channel_msg:
                     print("message general")
-                    client.sendall(message.encode())
                     send_msg_channel(message, get_user_from_client(client))
                 else:
                     client.sendall(message.encode())
