@@ -113,6 +113,8 @@ def is_in_channel(user):
     for k, v in channels.items():
         if user in v:
             return True
+        elif (set_admin(user)) in v:
+            return True
     return False
 
 
@@ -125,6 +127,8 @@ def get_channel_from_user(user):
     try:
         for k, v in channels.items():
             if user in v:
+                return k
+            elif set_admin(user) in v:
                 return k
     except Exception as e:
         print('Error: Cannot find the matching channel')
@@ -252,7 +256,10 @@ def leave(user):
     try:
         channel = get_channel_from_user(user)
         list_user = get_users_from_channel(channel)
-        list_user.remove(user)
+        if user in list_user:
+            list_user.remove(user)
+        elif set_admin(user) in list_user:
+            list_user.remove(set_admin(user))
         channels[channel] = list_user
     except Exception as e:
         print('Error : Cannot find user or channel.')
@@ -402,10 +409,10 @@ def start():
 
                 elif command == 'LEAVE':
                     print('Entering /LEAVE function')
-                    channel = get_channel_from_user(get_user_from_client(client))
+                    old_channel = get_channel_from_user(get_user_from_client(client))
                     leave(get_user_from_client(client))
-                    message = "You leave the channel %s\n" % channel
-                    print('<%s> has left the channel %s.' % (get_user_from_client(client), channel))
+                    message = "You leave the channel %s\n" % old_channel
+                    print('<%s> has left the channel %s.' % (get_user_from_client(client), old_channel))
 
                 elif command == 'BYE':
                     disconnect(client)
@@ -418,6 +425,10 @@ def start():
 
                 elif command == 'BAN':
                     ban(param[0])
+                
+                elif command == 'ERROR':
+                    print('Entering wrong function')
+                    message = 'Error. Unknown command, try "/HELP" to see the commands\n'
 
                 else:
                     message = data

@@ -166,54 +166,54 @@ def send_msg():
     elif command == '/HELP':
         help_command()
     elif '/' in command:
-        tmp.append((command.split()))
+        tmp.append((command.split(' ')))
         if '/JOIN' in command:
-            if len(tmp) == 1:
+            if len(tmp[0]) == 1:
                 print('Please enter a channel :')
                 new = input('')
                 join(new)
             else:
-                join(tmp[1])
+                join(tmp[0][1])
         elif command == 'MSG':
-            if len(tmp) == 1:
+            if len(tmp[0]) == 1:
                 print('Please enter a name :')
                 new = input('')
                 private(new)
             else:
-                private(tmp[1])
+                private(tmp[0][1])
 
         elif command == '/KICK':
-            if len(tmp) == 1:
+            if len(tmp[0]) == 1:
                 print('Please enter a name :')
                 new = input('')
                 kick(new)
             else:
-                kick(tmp[1])
+                kick(tmp[0][1])
         elif command == '/KILL':
-            if len(tmp) == 1:
+            if len(tmp[0]) == 1:
                 print('Please enter a name :')
                 new = input('')
                 kill(new)
             else:
-                kill(tmp[1])
+                kill(tmp[0][1])
         elif command == '/BAN':
-            if len(tmp) == 1:
+            if len(tmp[0]) == 1:
                 print('Please enter a name :')
                 new = input('')
                 ban(new)
             else:
-                ban(tmp[1])
+                ban(tmp[0][1])
         elif command == '/REN':
-            if len(tmp) == 1:
+            if len(tmp[0]) == 1:
                 print('Please enter a new name :')
                 new = input('')
                 rename(new)
             else:
-                rename(tmp[1])
+                rename(tmp[0][1])
         elif command.find('/') == 0:
-            print('Error. Unknown command, try "/HELP" to see the commands\n')
-    else:
-        send_data(command)
+            command = "ERROR"            
+        else:
+            send_data(command)
 
 
 """ MAIN """
@@ -232,5 +232,4 @@ while True:
     message = sock.recv(4096).decode()
     if message != '':
         print(message)
-
     send_msg()
