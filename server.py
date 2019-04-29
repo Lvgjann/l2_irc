@@ -437,7 +437,7 @@ def start():
 
                 elif command == 'ACK':
                     print("message ACK")
-                    message = ''
+                    message = 'ACK'
 
                 else:
                     message = data
