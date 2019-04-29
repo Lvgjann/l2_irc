@@ -14,7 +14,7 @@ V1 :
 TODO -> /CURRENT: print current channel name
 TODO -> /CURRENT <channel>: set current channel
 TODO -> /MSG <nick1;nick2;...> <message>: send a private message to several users in current channel
-TODO -> /NICK <nick>: change user nickname on server
+OK -> /NICK <nick>: change user nickname on server
 TODO -> /GRANT <nick>: grant admin privileges to a user [admin]
 TODO -> /REVOKE <nick>: revoke admin privileges [admin]
 TODO -> /SEND <nick> </path/to/file>: send a file to a remote user
