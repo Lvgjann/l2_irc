@@ -153,76 +153,87 @@ def help_command():
 
 
 def send_msg():
-    try:
-        command = input('')
-    except:
+    i, o, e = select.select( [sys.stdin], [], [], 0.5 )
+
+    if not i :
+        #send a message to keep the connection
         command = 'ACK'
+    else :
+        command = sys.stdin.readline().strip()
 
-    if command == '/LIST':
-        send_data("LIST")
-    elif command == '/WHO':
-        send_data("WHO")
-    elif command == '/LEAVE':
-        send_data("LEAVE")
-    elif command == '/BYE':
-        send_data("BYE")
-    elif command == '/HELP':
-        help_command()
+    #entered a command
+    if command != 'ACK':
+        #is a simple command
+        if command == '/LIST':
+            send_data("LIST")
+        elif command == '/WHO':
+            send_data("WHO")
+        elif command == '/LEAVE':
+            send_data("LEAVE")
+        elif command == '/BYE':
+            send_data("BYE")
+        elif command == '/HELP':
+            help_command()
 
-    elif '/' in command:
-        tmp.append((command.split()))
+        #is a command with parameters
+        elif '/' in command:
+            tmp.append((command.split()))
 
-        if '/JOIN' in command:
-            if len(tmp[0]) == 1:
-                print('Please enter a channel :')
-                new = input('')
-                join(new)
-            else:
-                join(tmp[0][1])
+            if '/JOIN' in command:
+                if len(tmp[0]) == 1:
+                    print('Please enter a channel :')
+                    new = input('')
+                    join(new)
+                else:
+                    join(tmp[0][1])
 
-        elif command == 'MSG':
-            if len(tmp[0]) == 1:
-                print('Please enter a name :')
-                new = input('')
-                private(new)
-            else:
-                private(tmp[0][1])
+            elif command == 'MSG':
+                if len(tmp[0]) == 1:
+                    print('Please enter a name :')
+                    new = input('')
+                    private(new)
+                else:
+                    private(tmp[0][1])
 
-        elif command == '/KICK':
-            if len(tmp[0]) == 1:
-                print('Please enter a name :')
-                new = input('')
-                kick(new)
-            else:
-                kick(tmp[0][1])
+            elif command == '/KICK':
+                if len(tmp[0]) == 1:
+                    print('Please enter a name :')
+                    new = input('')
+                    kick(new)
+                else:
+                    kick(tmp[0][1])
 
-        elif command == '/KILL':
-            if len(tmp[0]) == 1:
-                print('Please enter a name :')
-                new = input('')
-                kill(new)
-            else:
-                kill(tmp[0][1])
+            elif command == '/KILL':
+                if len(tmp[0]) == 1:
+                    print('Please enter a name :')
+                    new = input('')
+                    kill(new)
+                else:
+                    kill(tmp[0][1])
 
-        elif command == '/BAN':
-            if len(tmp[0]) == 1:
-                print('Please enter a name :')
-                new = input('')
-                ban(new)
-            else:
-                ban(tmp[0][1])
+            elif command == '/BAN':
+                if len(tmp[0]) == 1:
+                    print('Please enter a name :')
+                    new = input('')
+                    ban(new)
+                else:
+                    ban(tmp[0][1])
 
-        elif command == '/REN':
-            if len(tmp[0]) == 1:
-                print('Please enter a new name :')
-                new = input('')
-                rename(new)
-            else:
-                rename(tmp[0][1])
+            elif command == '/REN':
+                if len(tmp[0]) == 1:
+                    print('Please enter a new name :')
+                    new = input('')
+                    rename(new)
+                else:
+                    rename(tmp[0][1])
 
-        else :
-            send_data ("ERROR")  
-
+            #it's an unkown command
+            else :
+                send_data ("ERROR")  
+        #send message  
+        else:
+            send_data(command)
+    #send ACK
     else:
         send_data(command)
 
@@ -241,6 +252,6 @@ tmp = []
 
 while True:
     message = sock.recv(4096).decode()
-    if message != '':
+    if message != '' and message !='ACK':
         print(message)
     send_msg()

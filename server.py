@@ -373,6 +373,7 @@ def start():
             for client in waiting_clients:
                 data, ip = client.recvfrom(4096)
                 data = data.decode()
+                print ("data :" + data)
                 # Split the received data into 'command + parameter[i..n]' format
                 tmp = data.split()
                 command = tmp[0]
@@ -436,7 +437,6 @@ def start():
                     message = 'Error. Unknown command, try "/HELP" to see the commands\n'
 
                 elif command == 'ACK':
-                    print("message ACK")
                     message = 'ACK'
 
                 else:
@@ -446,8 +446,9 @@ def start():
                 if channel_msg:
                     print("message general")
                     send_msg_channel(message, get_user_from_client(client))
-                else:
-                    client.sendall(message.encode())
+                    message = 'ACK'
+                    
+                client.sendall(message.encode())
 
 
 """ MAIN """
