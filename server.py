@@ -16,6 +16,7 @@ client_to_user = {
 users = {
     # Nick[string] : IP[string]      
 }
+dead = []
 channels = {
     # Name channel[string] : List of users[list]
 }
@@ -278,11 +279,12 @@ def disconnect(client):
     """
         Close the connection with the IRC server
     """
+    # TODO : Correct this shit
     try:
         if get_channel_from_user(client):
             leave(client)
+        users.pop(get_user_from_client(client))
         client.shutdown(1)
-        client.close()
     except Exception as e:
         logging.exception(e)
 
@@ -352,6 +354,7 @@ def start():
         Start and loop the IRC server.
     """
     # tty.setraw(sys.stdin)
+    global alive
     print('Starting server...')
     connected_clients = []
     while True:
@@ -422,7 +425,9 @@ def start():
                     print('<%s> has left the channel %s.' % (get_user_from_client(client), old_channel))
 
                 elif command == 'BYE':
-                    disconnect(client)
+                    dead.append(client)
+                    connected_clients.remove(client)
+                    break
 
                 elif command == 'KICK':
                     kick(param[0], param[1])
@@ -448,8 +453,10 @@ def start():
                     print("message general")
                     send_msg_channel(message, get_user_from_client(client))
                     message = 'ACK'
-                    
+
                 client.sendall(message.encode())
+        for d in dead:
+            d.close()
 
 
 """ MAIN """

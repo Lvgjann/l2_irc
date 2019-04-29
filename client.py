@@ -153,17 +153,17 @@ def help_command():
 
 
 def send_msg():
-    i, o, e = select.select( [sys.stdin], [], [], 0.5 )
+    i, o, e = select.select([sys.stdin], [], [], 0.5)
 
-    if not i :
-        #send a message to keep the connection
+    if not i:
+        # send a message to keep the connection
         command = 'ACK'
-    else :
+    else:
         command = sys.stdin.readline().strip()
 
-    #entered a command
+    # entered a command
     if command != 'ACK':
-        #is a simple command
+        # is a simple command
         if command == '/LIST':
             send_data("LIST")
         elif command == '/WHO':
@@ -175,7 +175,7 @@ def send_msg():
         elif command == '/HELP':
             help_command()
 
-        #is a command with parameters
+        # is a command with parameters
         elif '/' in command:
             tmp.append((command.split()))
 
@@ -227,13 +227,13 @@ def send_msg():
                 else:
                     rename(tmp[0][1])
 
-            #it's an unkown command
-            else :
-                send_data ("ERROR")  
-        #send message  
+            # it's an unkown command
+            else:
+                send_data("ERROR")
+                # send message
         else:
             send_data(command)
-    #send ACK
+    # send ACK
     else:
         send_data(command)
 
@@ -252,6 +252,6 @@ tmp = []
 
 while True:
     message = sock.recv(4096).decode()
-    if message != '' and message !='ACK':
+    if message != '' and message != 'ACK':
         print(message)
     send_msg()
