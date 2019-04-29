@@ -5,8 +5,8 @@ OK -> /JOIN <channel>: join (or create) a channel
 OK -> /LEAVE: leave current channel
 OK -> /WHO: list users in current channel
 OK -> <message>: send a message in current channel
-TODO -> /MSG <nick> <message>: send a private message in current channel
-TODO -> /BYE: disconnect from server
+OK -> /MSG <nick> <message>: send a private message in current channel
+WIP -> /BYE: disconnect from server
 TODO -> /KICK <nick>: kick user from current channel [admin]
 TODO -> /REN <channel>: change the current channel name [admin]
 

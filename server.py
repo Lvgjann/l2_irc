@@ -152,6 +152,17 @@ def is_unique_nick(n):
 
 
 def is_admin(user):
+    try:
+        channel = get_channel_from_user(user)
+        if set_admin(user) in channels[channel]:
+            return True
+        return False
+    except Exception as e:
+        print('Error: Cannot find user %s.' % user)
+        logging.exception(e)
+
+
+def test_admin(user):
     """
         return true if the user is administrator
     :param user: The target user.
@@ -182,6 +193,8 @@ def channel_list():
     for c in channels.keys():
         print(c)
         msg = msg + c + '\n'
+    if msg == '':
+        msg = "There is no channel active on this server."
     return msg
 
 
@@ -232,7 +245,7 @@ def set_admin(user):
 def revoke(user):
     try:
         if is_admin(user):
-            return user.split('@')
+            return user.split('@')[1]
     except Exception as e:
         print('Error: %s is not administrator.' % user)
         logging.exception(e)
@@ -264,12 +277,15 @@ def leave(user):
     """
     try:
         channel = get_channel_from_user(user)
-        list_user = get_users_from_channel(channel)
-        if user in list_user:
-            list_user.remove(user)
-        elif set_admin(user) in list_user:
-            list_user.remove(set_admin(user))
-        channels[channel] = list_user
+        if is_admin(user):
+            delete_channel(channel)
+        else:
+            list_user = get_users_from_channel(channel)
+            if user in list_user:
+                list_user.remove(user)
+            elif set_admin(user) in list_user:
+                list_user.remove(set_admin(user))
+            channels[channel] = list_user
     except Exception as e:
         print('Error : Cannot find user or channel.')
         logging.exception(e)
@@ -299,12 +315,7 @@ def kick(user, channel):
     channels[channel].remove(user)
 
 
-def kill(client):
-    """
-        Remove an user from its current channel and close its connection.
-
-    :param client: The target client.
-    """
+"""def kill(client):
     try:
         usr = get_user_from_client(client)
         c = get_channel_from_user(client)
@@ -313,15 +324,10 @@ def kill(client):
         disconnect(client)
     except Exception as e:
         print('Error: cannot find target client.')
-        logging.exception(e)
+        logging.exception(e)"""
 
 
-def ban(client):
-    """
-        Force the disconnection of a user and ban its IP address.
-
-    :param client: The target user.
-    """
+"""def ban(client):
     try:
         usr = get_user_from_client(client)
         c = get_channel_from_user(client)
@@ -331,22 +337,47 @@ def ban(client):
         disconnect(client)
     except Exception as e:
         print('Error: cannot find target client.')
+        logging.exception(e)"""
+
+
+def private(client, msg, sender):
+    try:
+        message = '<%s> is wispering you - ' % sender
+        message = message + msg
+        client.sendall(message.encode())
+    except Exception as e:
+        print ('Error: the client didn\'t exit.\n')
         logging.exception(e)
 
 
 def send_msg_channel(msg, user):
     channel = get_channel_from_user(user)
+    message = '<%s> - ' % user
+    message = message + msg
 
     if channel is not None:
         list_user = get_users_from_channel(channel)
         for c in list_user:
             if (c != user) and (c != set_admin(user)):
-                print("enter")
                 if is_admin(c):
                     c = revoke(c)
                 client = get_client_from_user(c)
-                client.sendall(msg.encode())
-                # print (c)
+                client.sendall(message.encode())
+
+
+def help_command():
+    return ('\n\nThis is the list of the commands available on this server :\n'
+        '-> /HELP: print this message ;\n'
+        '-> /LIST: list all available channels on server ;\n'
+        '-> /JOIN <channel>: join (or create) a channel ;\n'
+        '-> /LEAVE: leave current channel ;\n'
+        '-> /WHO: list users in current channel ;\n'
+        '-> <message>: send a message in current channel ;\n'
+        '-> /MSG <nick> <message>: send a private message in current channel ;\n'
+        '-> /BYE: disconnect from server ;\n'
+        '\nIf you\'re admin on your channel :\n'
+        '--> /KICK <nick>: kick user from current channel [admin] ;\n'
+        '--> /REN <channel>: change the current channel name [admin] ;\n')
 
 
 def start():
@@ -377,13 +408,12 @@ def start():
             for client in waiting_clients:
                 data, ip = client.recvfrom(4096)
                 data = data.decode()
-                print("data :" + data)
                 # Split the received data into 'command + parameter[i..n]' format
                 tmp = data.split()
                 command = tmp[0]
                 param = []
-                for p in tmp[1:]:
-                    param.append(p)
+                for p in range (1, len(tmp)):
+                    param.append(tmp[p])
                 # Read the command and the possible parameters
 
                 if command == 'NICK':
@@ -415,7 +445,7 @@ def start():
                         message = 'You are not in a channel.'
 
                 elif command == 'MSG':
-                    private(param[0], param)
+                    private(get_client_from_user(param[0]), param[1], get_user_from_client(client))
 
                 elif command == 'LEAVE':
                     print('Entering /LEAVE function')
@@ -438,6 +468,9 @@ def start():
                 elif command == 'BAN':
                     ban(param[0])
 
+                elif command == 'HELP':
+                    message = help_command()
+
                 elif command == 'ERROR':
                     print('Entering wrong function')
                     message = 'Error. Unknown command, try "/HELP" to see the commands\n'
@@ -450,9 +483,8 @@ def start():
                     channel_msg = True
 
                 if channel_msg:
-                    print("message general")
                     send_msg_channel(message, get_user_from_client(client))
-                    message = 'ACK'
+                    message = ''
 
                 client.sendall(message.encode())
         for d in dead:

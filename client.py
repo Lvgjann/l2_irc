@@ -82,13 +82,13 @@ def nick():
         __log__(e)
 
 
-def private(usr):
+def private(usr, msg):
     """
         Send a private message to an user
     :param usr
     """
     try:
-        send_data("MSG %s" % usr)
+        send_data("MSG %s %s" % (usr, msg))
     except ValueError as e:
         print('Error: user cannot be empty.')
         __log__(e)
@@ -118,40 +118,6 @@ def kick(client):
     if is_client_valid(client):
         send_data("KICK %s" % client)
 
-
-def kill(client):
-    """
-        Kick the client from the server.
-
-    :param client: Target client.
-    """
-    if is_client_valid(client):
-        send_data("KILL %s" % client)
-
-
-def ban(client):
-    """
-        Kick the client from the server and ban its IP
-
-    :param client: Target client
-    """
-    if is_client_valid(client):
-        send_data("BAN %s" % client)
-
-
-def help_command():
-    print('/LIST : Display the current channels ;\n'
-          '/JOIN + channel : Join the channel "channel". If it doesn\'t exist, create and join ;\n'
-          '/WHO : Display the current user of the channel ;\n'
-          '/MSG + user : Send a private message to the user "user" ;\n'
-          '/LEAVE : Leave the channel ;\n'
-          '/BYE : Quit the server ;\n\n'
-          'IF YOU\'RE ADMIN : \n'
-          '-> /KICK + user : Leave the user "user" of the current channel ;\n'
-          '-> /KILL + user : Disconnect the user "user" ;\n'
-          '-> /BAN + user : Disconnect the user "user" and blacklists the IP address ;\n')
-
-
 def send_msg():
     i, o, e = select.select([sys.stdin], [], [], 0.5)
 
@@ -173,7 +139,7 @@ def send_msg():
         elif command == '/BYE':
             send_data("BYE")
         elif command == '/HELP':
-            help_command()
+            send_data("HELP")
 
         # is a command with parameters
         elif '/' in command:
@@ -187,15 +153,15 @@ def send_msg():
                 else:
                     join(tmp[0][1])
 
-            elif command == 'MSG':
-                if len(tmp[0]) == 1:
-                    print('Please enter a name :')
+            elif '/MSG' in command:
+                if len(tmp[0]) <= 2:
+                    print('Please enter a name and a message :')
                     new = input('')
                     private(new)
                 else:
-                    private(tmp[0][1])
+                    private(tmp[0][1], tmp[0][2])
 
-            elif command == '/KICK':
+            elif '/KICK' in command:
                 if len(tmp[0]) == 1:
                     print('Please enter a name :')
                     new = input('')
@@ -203,23 +169,7 @@ def send_msg():
                 else:
                     kick(tmp[0][1])
 
-            elif command == '/KILL':
-                if len(tmp[0]) == 1:
-                    print('Please enter a name :')
-                    new = input('')
-                    kill(new)
-                else:
-                    kill(tmp[0][1])
-
-            elif command == '/BAN':
-                if len(tmp[0]) == 1:
-                    print('Please enter a name :')
-                    new = input('')
-                    ban(new)
-                else:
-                    ban(tmp[0][1])
-
-            elif command == '/REN':
+            elif '/REN' in command:
                 if len(tmp[0]) == 1:
                     print('Please enter a new name :')
                     new = input('')
@@ -246,11 +196,10 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
 irc_conn()
 # Defines a nickname
 nickname = nick()
-print("You choose the nick %s, you can use the command below : \n" % nickname)
-help_command()
-tmp = []
+print("You choose the nick %s, to see the commands, entered '/HELP' \n" % nickname)
 
 while True:
+    tmp = []
     message = sock.recv(4096).decode()
     if message != '' and message != 'ACK':
         print(message)
