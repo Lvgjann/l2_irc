@@ -22,18 +22,6 @@ def __log__(e):
     """
     logging.exception(e)
 
-
-def is_client_valid(client):
-    """
-        Check if the client is valid.
-    :param client: Target client.
-    """
-    if not client:
-        print('Error: client cannot be empty.')
-        return False
-    return True
-
-
 def irc_conn():
     """
         Establish connection with the IRC server.
@@ -121,15 +109,19 @@ def rename(channel):
 
 """ADMINISTRATOR COMMANDS"""
 
+def grant(user):
+    if user:
+        send_data("GRANT %s" % user)
 
-def kick(client):
+
+def kick(user):
     """
         Kick the client from its channel.
 
     :param client: Target client.
     """
-    if is_client_valid(client):
-        send_data("KICK %s" % client)
+    if user:
+        send_data("KICK %s" % user)
 
 
 def send_msg():
@@ -192,13 +184,21 @@ def send_msg():
                 else:
                     rename(tmp[0][1])
 
-            elif 'NICK' in command:
+            elif '/NICK' in command:
                 if len(tmp[0]) == 1:
                     print('Please enter a nickname : ')
                     new = input()
                     nick(new)
                 else:
                     nick(tmp[0][1])
+
+            elif '/GRANT' in command:
+                if len(tmp[0]) == 1:
+                    print('Please enter a user name')
+                    new = input('')
+                    grant(new)
+                else:
+                    rename(tmp[0][1])
 
             # it's an unkown command
             else:
