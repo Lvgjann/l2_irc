@@ -11,7 +11,7 @@ OK -> /KICK <nick>: kick user from current channel [admin]
 OK -> /REN <channel>: change the current channel name [admin]
 
 V1 :
-WIP -> /CURRENT: print current channel name
+OK -> /CURRENT: print current channel name
 WIP -> /CURRENT <channel>: set current channel
 OK -> /MSG <nick1;nick2;...> <message>: send a private message to several users in current channel
 OK -> /NICK <nick>: change user nickname on server

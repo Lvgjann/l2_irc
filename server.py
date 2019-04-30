@@ -289,9 +289,9 @@ def private_message(client, msg, sender):
 
 
 def current(client):
-    print ("in current")
     try:
-        return get_channel_from_user(get_user_from_client(client))
+        message = "You're in the -> channel %s" % get_channel_from_user(get_user_from_client(client))
+        return message
     except Exception as e:
         __log__('Cannot find target channel. The client may not be in a channel\n', e)
 
@@ -609,8 +609,7 @@ def get_data(client, command, param, data, ):
             channel_message(message, old_channel, get_user_from_client(client))
 
         elif command == 'CURRENT':
-            """ TODO """
-            if param[0] == '':
+            if param[0] == 'ACK':
                 message = current(client)
             else :
                 message = current_set(client, param[0])

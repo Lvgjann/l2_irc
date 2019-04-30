@@ -232,7 +232,7 @@ def send_msg():
                 if len(tmp[0]) > 2:
                     error = True
                 elif len(tmp[0]) == 1:
-                    channel = ''
+                    channel = 'ACK'
                     current(channel)
                 else:
                     current(tmp[0][1])
