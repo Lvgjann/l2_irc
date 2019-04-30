@@ -22,6 +22,7 @@ def __log__(e):
     """
     logging.exception(e)
 
+
 def irc_conn():
     """
         Establish connection with the IRC server.
@@ -63,6 +64,7 @@ def nick_first():
     """
     try:
         n = input('Choose a nickname:')
+        print('You chose %s' % n)
         send_data('NICK %s' % n)
         return n
     except Exception as e:
@@ -109,29 +111,26 @@ def rename(channel):
 
 """ADMINISTRATOR COMMANDS"""
 
-def grant(user):
-    if user:
-        send_data("GRANT %s" % user)
+
+def grant(u):
+    if u:
+        send_data("GRANT %s" % u)
 
 
-def kick(user):
+def kick(u):
     """
         Kick the client from its channel.
 
-    :param client: Target client.
+    :param u: Target client.
     """
-    if user:
-        send_data("KICK %s" % user)
+    if u:
+        send_data("KICK %s" % u)
 
 
 def send_msg():
     i, o, e = select.select([sys.stdin], [], [], 0.5)
 
-    if not i:
-        # send a message to keep the connection
-        command = 'ACK'
-    else:
-        command = sys.stdin.readline().strip()
+    command = 'ACK' if not i else sys.stdin.readline().strip()
 
     # entered a command
     if command != 'ACK':
