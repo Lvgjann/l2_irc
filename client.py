@@ -16,10 +16,11 @@ user = {
 }
 
 
-def __log__(e):
+def __log__(err, e):
     """
         Return the error log.
     """
+    print('Error : %s' % err)
     logging.exception(e)
 
 
@@ -38,13 +39,13 @@ def irc_conn():
 def send_data(data):
     """
         Send a data to the server.
-
     :param data: Data block to send
     """
     sock.send(data.encode())
 
 
 """ IRC FUNCTIONS """
+
 
 def nick_first():
     """
@@ -55,135 +56,123 @@ def nick_first():
         send_data('NICK %s' % n)
         return n
     except Exception as e:
-        print('Error: nickname cannnot be empty.')
-        __log__(e)
+        __log__('You must specify a nickname.', e)
 
 
 def join(channel):
     """
         Join a channel
-
     :param channel: Target channel.
     """
     try:
         send_data("JOIN %s" % channel)
     except ValueError as e:
-        print('Error: channel cannot be empty.')
-        __log__(e)
+        __log__('You must specify a channel to join.', e)
 
 
 def nick(n):
     """
-        Define a nick for a user.
-
-    :param n:
+        Define a nickname for a user.
+    :param n: Nickname to attribute.
     """
     try:
         send_data('NICK %s' % n)
     except Exception as e:
-        print('Error: nickname cannnot be empty.')
-        __log__(e)
+        __log__('You must specify a nickname.', e)
 
 
 def private(n, msg):
     """
-        Send a private message to an user
-
-    :param msg: the private message
-    :param n: the user 
+        Send a private message to an user.
+    :param msg: the private message.
+    :param n: the user .
     """
     try:
         send_data("MSG %s %s" % (n, msg))
     except ValueError as e:
-        print('Error: nickname cannot be empty.')
-        __log__(e)
+        __log__('You must specify a receiver nickname.', e)
 
 
 def current(channel):
     send_data("CURRENT %s" % channel)
 
 
-def send(nick, path):
+def send(n, path):
+    """
+        Send a file to an user.
+    :param n: Target user's nickname.
+    :param path: File path.
+    """
     try:
-        send_data("SEND %s %s" % (nick, path))
+        send_data("SEND %s %s" % (n, path))
     except ValueError as e:
-        print('Error: nick and path cannot be empty.')
-        __log__(e)
+        __log__('You must specify a receiver nickname.', e)
 
 
 def recv(path):
+    """
+        Receive a file.
+    :param path: File path.
+    """
     try:
         send_data("RECV %s %s" % path)
     except ValueError as e:
-        print('Error: path cannot be empty.')
-        __log__(e)
+        __log__('You must specify a path.', e)
+
 
 """ADMINISTRATOR COMMANDS"""
+
 
 def kick(n):
     """
         Kick the client from its channel.
-
-    :param u: Target client.
+    :param n: Target nickname.
     """
     try:
         send_data("KICK %s" % n)
     except Exception as e:
-        print('Error: nickname cannot be empty')
-        __log__(e)
+        __log__('You must specify a nickname.', e)
 
 
 def rename(channel):
     """
         Rename channel
-
     :param channel: The new name of the channel
     """
     try:
         send_data("REN %s" % channel)
     except ValueError as e:
         print('Error: channel cannot be empty')
-        __log__(e)
+        __log__('You must specify a channel.', e)
 
 
 def grant(n):
     """
         Grant admin privileges to as user
-    
-    :param u: the user to grant
+    :param n: the user to grant
     """
     try:
         send_data("GRANT %s" % n)
     except ValueError as e:
-        print('Error: nickname cannot be empty')
-        __log__(e)
-
+        __log__('You must specify a nickname', e)
 
 
 def revoke(n):
     """
         Revoke admin privilege from a user
-    
-    :param u: the user to revoke
+    :param n: the user to revoke
     """
     try:
-        send_data("REVOKE %s" %n)
+        send_data("REVOKE %s" % n)
     except Exception as e:
-        print('Error: nickname cannot be empty')
-        __log__(e)
+        __log__('You must specify a nickname', e)
 
 
-def send_msg():
-    error = False
-    tmp = []
-
-    i, o, e = select.select([sys.stdin], [], [], 0.5)
-
-    command = 'ACK' if not i else sys.stdin.readline().strip()
-
-    # entered a command
-    if command != 'ACK':
-        # is a simple command
+def read_command_light(command):
+    """
+        Command without parameter treatment.
+    """
+    try:
         if command == '/HELP':
             send_data("HELP")
         elif command == '/LIST':
@@ -196,96 +185,111 @@ def send_msg():
             send_data("BYE")
         elif command == '/HISTORY':
             send_data("HISTORY")
-        
-        # is a command with parameters
-        elif '/' in command:
-            tmp.append((command.split()))
+    except Exception as e:
+        __log__('Invalid command.', e)
 
-            if '/JOIN' in command:
-                if len(tmp[0]) != 2:
-                    error = True
-                else:
-                    join(tmp[0][1])
 
-            elif '/MSG' in command:
-                if len(tmp[0]) < 3:
-                    error = True
-                else:
-                    tmp_user = ''
-                    for i in range (1, len(tmp[0]) - 1):
-                        tmp_user = tmp_user + (tmp[0][i])
-                    private(tmp_user, tmp[0][len(tmp[0]) - 1])
+def read_command(command):
+    """
+        Comment with parameters treatment.
+    """
+    try:
+        err = False
+        tmp = [(command.split())]
 
-            elif '/KICK' in command:
-                if len(tmp[0]) != 2:
-                    error = True
-                else:
-                    kick(tmp[0][1])
-
-            elif '/REN' in command:
-                if len(tmp[0]) != 2:
-                    error = True
-                else:
-                    rename(tmp[0][1])
-            
-            elif '/CURRENT' in command:
-                if len(tmp[0]) > 2:
-                    error = True
-                elif len(tmp[0]) == 1:
-                    channel = 'ACK'
-                    current(channel)
-                else:
-                    current(tmp[0][1])
-
-            elif '/NICK' in command:
-                if len(tmp[0]) != 2:
-                    error = True
-                else:
-                    nick(tmp[0][1])
-
-            elif '/GRANT' in command:
-                if len(tmp[0]) != 2:
-                    error = True
-                else:
-                    grant(tmp[0][1])
-
-            elif '/REVOKE' in command:
-                if len(tmp[0]) != 2:
-                    error = True
-                else:
-                    revoke(tmp[0][1])
-
-            elif '/SEND' in command:
-                if len(tmp[0]) != 3:
-                    error = True
-                else:
-                    send(tmp[0][1], tmp[0][2])
-
-            elif '/RECV' in command:
-                if len(tmp[0]) != 2:
-                    error = True
-                else:
-                    recv(tmp[0][1])
-
-            # it's an unkown command
+        if '/JOIN' in command:
+            if len(tmp[0]) != 2:
+                err = True
             else:
-                error = True
-                # send message
+                join(tmp[0][1])
 
-            if error:
-                send_data("ERROR")
+        elif '/MSG' in command:
+            if len(tmp[0]) < 3:
+                err = True
+            else:
+                tmp_user = ''
+                for i in range(1, len(tmp[0]) - 1):
+                    tmp_user = tmp_user + (tmp[0][i])
+                private(tmp_user, tmp[0][len(tmp[0]) - 1])
+
+        elif '/KICK' in command:
+            if len(tmp[0]) != 2:
+                err = True
+            else:
+                kick(tmp[0][1])
+
+        elif '/REN' in command:
+            if len(tmp[0]) != 2:
+                err = True
+            else:
+                rename(tmp[0][1])
+
+        elif '/CURRENT' in command:
+            if len(tmp[0]) > 2:
+                err = True
+            elif len(tmp[0]) == 1:
+                channel = 'ACK'
+                current(channel)
+            else:
+                current(tmp[0][1])
+
+        elif '/NICK' in command:
+            if len(tmp[0]) != 2:
+                err = True
+            else:
+                nick(tmp[0][1])
+
+        elif '/GRANT' in command:
+            if len(tmp[0]) != 2:
+                err = True
+            else:
+                grant(tmp[0][1])
+
+        elif '/REVOKE' in command:
+            if len(tmp[0]) != 2:
+                err = True
+            else:
+                revoke(tmp[0][1])
+
+        elif '/SEND' in command:
+            if len(tmp[0]) != 3:
+                err = True
+            else:
+                send(tmp[0][1], tmp[0][2])
+
+        elif '/RECV' in command:
+            if len(tmp[0]) != 2:
+                err = True
+            else:
+                recv(tmp[0][1])
+
         else:
-            send_data(command)
-    # send ACK
+            err = True
+            # send message
+
+        if err:
+            print('Error: Invalid arguments.')
+            send_data("ERROR")
+    except Exception as e:
+        __log__('Invalid command or arguments.', e)
+
+
+def send_msg():
+    i, o, e = select.select([sys.stdin], [], [], 0.5)
+    command = 'ACK' if not i else sys.stdin.readline().strip()
+
+    # Reading a command
+    if command != 'ACK' and '/' in command:
+        read_command_light(command)
+        read_command(command)
     else:
         send_data(command)
 
 
 """ MAIN """
 
-# Opening a socket
+# Opening a socket and IRC connection
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-# Connects to the IRC server
 irc_conn()
 # Defines a nickname
 nickname = nick_first()
