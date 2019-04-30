@@ -434,12 +434,13 @@ def channel_message(msg, channel, user):
 
     if channel is not None:
         list_user = get_users_from_channel(channel)
-        for c in list_user:
-            if (c != user) and (c != set_admin(user)):
-                if test_admin(c):
-                    c = revoke(c)
-                client = get_client_from_user(c)
-                client.sendall(message.encode())
+        if list_user:
+            for c in list_user:
+                if (c != user) and (c != set_admin(user)):
+                    if test_admin(c):
+                        c = revoke(c)
+                    client = get_client_from_user(c)
+                    client.sendall(message.encode())
 
 
 def current(client):
