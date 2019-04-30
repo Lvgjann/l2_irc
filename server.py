@@ -182,6 +182,7 @@ def nick(nickname, client):
     :param client: Client to update.
     """
     try:
+        print('Name %s' % nickname)
         clients.update({client: nickname})
         users.update({nickname: "127.0.0.1"})
         print('<%s> is connected.' % nickname)
@@ -379,7 +380,7 @@ def kick(user_admin, user_to_kick):
         else:
             leave(user_to_kick)
             message = "%s was removed from %s by the admin" % (user_to_kick, channel)
-        return message,a
+        return message, a
     except Exception as e:
         __log__("Invalid user or channel.", e)
 
@@ -450,7 +451,12 @@ def current(client):
         __log__('Cannot find target channel. The client may not be in a channel.', e)
 
 
-def grant_client(admin, user):
+def grant(admin, user):
+    """
+        Grant as administrator an user
+    :param admin: The user who grants the user
+    :param user: The target user
+    """
     try:
         a = True
         if not is_admin(admin):
@@ -480,8 +486,94 @@ def help_command():
 
 
 # TODO : This function must be the if/elif block treating the command sent in the start()
-# def get_data(client, command, parameters):
+def get_data(client, command, param, data, channel_msg):
+    message = ''
+    if command == 'NICK':
+        print('Entering /NICK function')
+        if not is_unique_nick(param[0]):
+            nick(param[0], client)
+            message = 'Your nick is : %s\n' % param[0]
+        else:
+            message = 'Error : Nickname already used, please try again with the command /NICK <nick>.'
+            print(message)
 
+    elif command == 'LIST':
+        print('Entering /LIST function')
+        message = channel_list()
+        print("list : " + message)
+
+    elif command == 'JOIN':
+        join(param[0], get_user_from_client(client))
+        message = 'has joined the channel %s.' % param[0]
+        print(message)
+        channel_message(message, get_channel_from_user(get_user_from_client(client)),
+                        get_user_from_client(client))
+        message = "You joined the channel %s\n" % param[0]
+
+    elif command == 'WHO':
+        print('Entering /WHO function')
+        if is_in_channel(get_user_from_client(client)):
+            message = who(get_channel_from_user(get_user_from_client(client)))
+            print(message)
+        else:
+            message = 'You are not in a channel.'
+
+    elif command == 'GRANT':
+        grant(client, param[0])
+
+    elif command == 'MSG':
+        private_message(get_client_from_user(param[0]), param[1], get_user_from_client(client))
+
+    elif command == 'LEAVE':
+        old_channel = get_channel_from_user(get_user_from_client(client))
+        leave(get_user_from_client(client))
+        message = "has left the channel %s." % old_channel
+        print(message)
+        channel_message(message, old_channel, get_user_from_client(client))
+        message = 'You left the channel %s' % old_channel
+
+    elif command == 'BYE':
+        return 'Bye'
+
+    elif command == 'KICK':
+        message, a = kick(get_user_from_client(client), param[0])
+        print(message)
+        if a:
+            msg = "You've been kicked from %s by the admin" % get_channel_from_user(
+                get_user_from_client(client))
+        else:
+            msg = 'ACK'
+        get_client_from_user(param[0]).sendall(msg.encode())
+        channel_msg = True
+
+    elif command == 'HELP':
+        message = help_command()
+
+    elif command == 'REN':
+        old_channel = get_channel_from_user(get_user_from_client(client))
+        message = rename(param[0], client)
+        print(message)
+        channel_message(message, old_channel, get_user_from_client(client))
+
+    elif command == '/CURRENT':
+        message = current(client)
+
+    elif command == 'ERROR':
+        print('Error case. Something has gone wrong.')
+        message = 'Error. Unknown command, try "/HELP" to see the commands\n'
+
+    elif command == 'ACK':
+        message = 'ACK'
+
+    else:
+        message = data
+        channel_msg = True
+
+    if channel_msg:
+        channel_message(message, get_channel_from_user(get_user_from_client(client)),
+                        get_user_from_client(client))
+        message = ''
+    return message
 
 
 def start():
@@ -493,7 +585,6 @@ def start():
     connected_clients = []
     while True:
         dead = []
-        message = ''
         channel_msg = False
         # Verifying if new clients want to connect.
         # Listen to the irc connection, initialized in __init()__, and we wait 50ms
@@ -520,96 +611,10 @@ def start():
                     param.append(tmp[p])
                 # Read the command and the possible parameters
 
-                # TODO : get_data() expected call
-                if command == 'NICK':
-                    print('Entering /NICK function')
-                    if not is_unique_nick(param[0]):
-                        nick(param[0], client)
-                        message = 'Your nick is : %s\n' % param[0]
-                    else:
-                        message = 'Error : Nickname already used, please try again with the command /NICK <nick>.'
-                        print(message)
-
-                elif command == 'LIST':
-                    print('Entering /LIST function')
-                    message = channel_list()
-                    print("list : " + message)
-
-                elif command == 'JOIN':
-                    join(param[0], get_user_from_client(client))
-                    message = 'has joined the channel %s.' % param[0]
-                    print(message)
-                    channel_message(message, get_channel_from_user(get_user_from_client(client)),
-                                    get_user_from_client(client))
-                    message = "You joined the channel %s\n" % param[0]
-
-                elif command == 'WHO':
-                    print('Entering /WHO function')
-                    if is_in_channel(get_user_from_client(client)):
-                        message = who(get_channel_from_user(get_user_from_client(client)))
-                        print(message)
-                    else:
-                        message = 'You are not in a channel.'
-
-                elif command == 'GRANT':
-                    grant_client(client, param [0])
-
-                elif command == 'MSG':
-                    private_message(get_client_from_user(param[0]), param[1], get_user_from_client(client))
-
-                elif command == 'LEAVE':
-                    old_channel = get_channel_from_user(get_user_from_client(client))
-                    leave(get_user_from_client(client))
-                    message = "has left the channel %s." % old_channel
-                    print(message)
-                    channel_message(message, old_channel, get_user_from_client(client))
-                    message = 'You left the channel %s' % old_channel
-
-                elif command == 'BYE':
+                message = get_data(client, command, param, data, channel_msg)
+                if message is 'Bye':
                     dead.append(client)
                     connected_clients.remove(client)
-                    break
-
-                elif command == 'KICK':
-                    message,a = kick(get_user_from_client(client), param[0])
-                    print(message)
-                    if a:
-                        msg = "You've been kicked from %s by the admin" % get_channel_from_user(
-                        get_user_from_client(client))
-                    else:
-                        msg = 'ACK'
-                    get_client_from_user(param[0]).sendall(msg.encode())
-                    channel_msg = True
-
-                elif command == 'HELP':
-                    message = help_command()
-
-                elif command == 'REN':
-                    old_channel = get_channel_from_user(get_user_from_client(client))
-                    message = rename(param[0], client)
-                    print(message)
-                    channel_message(message, old_channel, get_user_from_client(client))
-
-                elif command == '/CURRENT':
-                    message = current(client)
-
-                elif command == 'ERROR':
-                    print('Error case. Something has gone wrong.')
-                    message = 'Error. Unknown command, try "/HELP" to see the commands\n'
-
-                elif command == 'ACK':
-                    message = 'ACK'
-
-                else:
-                    message = data
-                    channel_msg = True
-
-                if channel_msg:
-                    channel_message(message, get_channel_from_user(get_user_from_client(client)),
-                                    get_user_from_client(client))
-                    message = ''
-
-                # TODO : get_data() end of call
                 client.sendall(message.encode())
         for d in dead:
             remove_client_user(d)
