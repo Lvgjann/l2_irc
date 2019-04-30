@@ -578,7 +578,7 @@ def start():
                         get_user_from_client(client))
                     else:
                         msg = 'ACK'
-                    param[0].sendall(msg.encode())
+                    get_client_from_user(param[0]).sendall(msg.encode())
                     channel_msg = True
 
                 elif command == 'HELP':
