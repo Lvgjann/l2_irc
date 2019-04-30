@@ -16,9 +16,6 @@ user = {
 }
 
 
-""" IRC FUNCTIONS """
-
-
 def __log__(e):
     """
         Return the error log.
@@ -47,7 +44,7 @@ def send_data(data):
     sock.send(data.encode())
 
 
-""" COMMANDS FUNCTIONS """
+""" IRC FUNCTIONS """
 
 def nick_first():
     """
@@ -103,11 +100,7 @@ def private(n, msg):
 
 
 def current(channel):
-    try:
-        send_data("CURRENT %s" % channel)
-    except ValueError as e:
-        print('Error: channel cannot be empty.')
-        __log__(e)
+    send_data("CURRENT %s" % channel)
 
 
 def send(nick, path):
@@ -174,7 +167,7 @@ def revoke(n):
     :param u: the user to revoke
     """
     try:
-        send_data("GRANT %s" %n)
+        send_data("REVOKE %s" %n)
     except Exception as e:
         print('Error: nickname cannot be empty')
         __log__(e)
@@ -218,10 +211,9 @@ def send_msg():
                 if len(tmp[0]) < 3:
                     error = True
                 else:
-                    tmp_user = []
+                    tmp_user = ''
                     for i in range (1, len(tmp[0]) - 1):
-                        print ("i : %d" % i)
-                        tmp_user.append(tmp[0][i])
+                        tmp_user = tmp_user + (tmp[0][i])
                     private(tmp_user, tmp[0][len(tmp[0]) - 1])
 
             elif '/KICK' in command:
@@ -297,10 +289,16 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
 irc_conn()
 # Defines a nickname
 nickname = nick_first()
-print("You choose the nick %s, to see the commands, entered '/HELP' \n" % nickname)
+print("To see the commands, entered '/HELP' \n")
 
 while True:
     message = sock.recv(4096).decode()
-    if message != '' and message != 'ACK':
+
+    if message.startswith('ACK'):
+        message = message.split('ACK')[1]
+    if message.endswith('ACK'):
+        message = message.split('ACK')[0]
+
+    if message != '':
         print(message)
     send_msg()

@@ -13,10 +13,10 @@ OK -> /REN <channel>: change the current channel name [admin]
 V1 :
 WIP -> /CURRENT: print current channel name
 WIP -> /CURRENT <channel>: set current channel
-TODO -> /MSG <nick1;nick2;...> <message>: send a private message to several users in current channel
+OK -> /MSG <nick1;nick2;...> <message>: send a private message to several users in current channel
 OK -> /NICK <nick>: change user nickname on server
-WIP -> /GRANT <nick>: grant admin privileges to a user [admin]
-WIP -> /REVOKE <nick>: revoke admin privileges [admin]
+OK -> /GRANT <nick>: grant admin privileges to a user [admin]
+OK -> /REVOKE <nick>: revoke admin privileges [admin]
 WIP -> /SEND <nick> </path/to/file>: send a file to a remote user
 WIP -> /RECV </path/to/file>: receive a file and save it locally
 TODO -> /HISTORY: print history of current channel (saved by server)
